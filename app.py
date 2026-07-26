@@ -23,7 +23,12 @@ from werkzeug.security import (
 )
 
 from code_analyzer import analyze_code
-from database import get_db_connection, init_db, now_text
+from database import (
+    ensure_configured_admin,
+    get_db_connection,
+    init_db,
+    now_text
+)
 from deepseek_api import handle_question
 from pet_generator.build_petpack import (
     MAX_FILES,
@@ -65,6 +70,25 @@ app.config["MAX_CONTENT_LENGTH"] = (
 
 # 网站启动时检查并初始化数据库
 init_db()
+
+admin_username = os.getenv(
+    "ADMIN_USERNAME",
+    ""
+).strip()
+admin_password_hash = os.getenv(
+    "ADMIN_PASSWORD_HASH",
+    ""
+).strip()
+
+if bool(admin_username) != bool(admin_password_hash):
+    raise RuntimeError(
+        "ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be configured together."
+    )
+
+ensure_configured_admin(
+    admin_username,
+    admin_password_hash
+)
 
 
 def normalize_script_tags(raw_tags):

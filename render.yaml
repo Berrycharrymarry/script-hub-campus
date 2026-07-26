@@ -11,5 +11,9 @@ services:
         value: production
       - key: FLASK_SECRET_KEY
         generateValue: true
+      - key: ADMIN_USERNAME
+        value: Berry
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
       - key: DEEPSEEK_API_KEY
         sync: false

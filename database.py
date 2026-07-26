@@ -38,6 +38,78 @@ def get_db_connection():
     return conn
 
 
+def ensure_configured_admin(username, password_hash):
+    """
+    Restore the configured administrator after an ephemeral database reset.
+
+    The password hash is supplied through a private environment variable and
+    is never stored in the public repository.
+    """
+    normalized_username = str(username or "").strip()
+    normalized_password_hash = str(password_hash or "").strip()
+
+    if not normalized_username or not normalized_password_hash:
+        return False
+
+    if not 3 <= len(normalized_username) <= 30:
+        raise ValueError(
+            "ADMIN_USERNAME must contain between 3 and 30 characters."
+        )
+
+    current_time = now_text()
+    conn = get_db_connection()
+
+    try:
+        existing_user = conn.execute("""
+            SELECT id
+            FROM users
+            WHERE username = ? COLLATE NOCASE
+        """, (normalized_username,)).fetchone()
+
+        if existing_user is None:
+            conn.execute("""
+                INSERT INTO users (
+                    username,
+                    email,
+                    password_hash,
+                    role,
+                    is_active,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, 'admin', 1, ?, ?)
+            """, (
+                normalized_username,
+                None,
+                normalized_password_hash,
+                current_time,
+                current_time
+            ))
+
+        else:
+            conn.execute("""
+                UPDATE users
+                SET username = ?,
+                    password_hash = ?,
+                    role = 'admin',
+                    is_active = 1,
+                    updated_at = ?
+                WHERE id = ?
+            """, (
+                normalized_username,
+                normalized_password_hash,
+                current_time,
+                existing_user["id"]
+            ))
+
+        conn.commit()
+
+    finally:
+        conn.close()
+
+    return True
+
+
 def get_table_columns(conn, table_name):
     """返回指定数据表当前拥有的全部字段名。"""
     rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
