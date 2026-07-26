@@ -1,0 +1,2 @@
+"""Desktop pet executable generator."""
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 助手测试 - ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/scripts">脚本库</a>
+            <a href="/upload">上传脚本</a>
+            <a href="/ai-test" class="active">AI 助手</a>
+            <a href="/pet-generator">桌宠工坊</a>
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+            ☰
+        </button>
+    </nav>
+
+    <div class="container">
+        <h1>🤖 AI 助手测试</h1>
+        <p class="subtitle">基于 DeepSeek 的 AI 问答助手，可以帮你解答编程、学习、生活中的问题。</p>
+
+        <form class="ai-form" method="post">
+            <div class="form-group">
+                <label for="question">请输入你的问题：</label>
+                <textarea id="question" name="question" rows="6"
+                    placeholder="在这里输入问题……">{{ question }}</textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="button button-primary">🚀 发送问题</button>
+                <a class="button button-outline" href="/">返回首页</a>
+            </div>
+        </form>
+
+        {% if answer %}
+            <div class="answer-card">
+                <div class="answer-header">
+                    <h3>💡 AI 回答</h3>
+                </div>
+                <div class="answer-body">
+                    <pre>{{ answer }}</pre>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <p>ScriptHub Campus · 让重复劳动少一点</p>
+    </footer>
+</body>
+</html>

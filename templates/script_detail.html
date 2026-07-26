@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ script.title }} - ScriptHub Campus
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    >
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+
+            <a href="/">
+                ScriptHub Campus
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+
+            <a
+                href="/scripts"
+                class="active"
+            >
+                脚本库
+            </a>
+
+            <a href="/upload">
+                上传脚本
+            </a>
+
+            <a href="/ai-test">
+                AI 助手
+            </a>
+
+            <a href="/pet-generator">
+                桌宠工坊
+            </a>
+
+            {% if session.get("user_id") %}
+                <a href="/my/scripts">
+                    我的投稿
+                </a>
+
+                <form
+                    action="/logout"
+                    method="post"
+                    class="nav-logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="nav-logout-button"
+                    >
+                        退出登录
+                    </button>
+                </form>
+
+            {% else %}
+                <a href="/login">
+                    登录
+                </a>
+
+                <a
+                    href="/register"
+                    class="nav-register-link"
+                >
+                    注册
+                </a>
+            {% endif %}
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            onclick="
+                document
+                    .querySelector('.nav-links')
+                    .classList
+                    .toggle('open')
+            "
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="container script-detail-container">
+        <a
+            class="back-link"
+            href="/scripts"
+        >
+            ← 返回脚本库
+        </a>
+
+        <section class="detail-hero-card">
+            <div class="detail-title-area">
+                <div class="detail-title-top">
+                    <span class="detail-file-icon">
+                        &lt;/&gt;
+                    </span>
+
+                    <div>
+                        <p class="detail-kicker">
+                            COMMUNITY SCRIPT
+                        </p>
+
+                        <h1>
+                            {{ script.title }}
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="detail-badges">
+                    <span class="lang-badge">
+                        {{ script.language }}
+                    </span>
+
+                    <span class="category-tag">
+                        {{ script.category or "其他" }}
+                    </span>
+
+                    <span class="detail-status">
+                        ✓ 已审核
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-author-box">
+                <span class="author-avatar">
+                    {{
+                        (
+                            script.author_name
+                            or "匿"
+                        )[0]
+                    }}
+                </span>
+
+                <div>
+                    <span class="author-label">
+                        投稿者
+                    </span>
+
+                    <strong>
+                        {{
+                            script.author_name
+                            or "匿名用户"
+                        }}
+                    </strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="detail-stat-grid">
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">👁️</span>
+
+                <div>
+                    <strong>
+                        {{ script.view_count or 0 }}
+                    </strong>
+
+                    <span>浏览次数</span>
+                </div>
+            </article>
+
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">📋</span>
+
+                <div>
+                    <strong id="copy-count">
+                        {{ script.copy_count or 0 }}
+                    </strong>
+
+                    <span>复制次数</span>
+                </div>
+            </article>
+
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">⬇️</span>
+
+                <div>
+                    <strong>
+                        {{ script.download_count or 0 }}
+                    </strong>
+
+                    <span>下载次数</span>
+                </div>
+            </article>
+
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">❤️</span>
+
+                <div>
+                    <strong id="like-count">
+                        {{ script.like_count or 0 }}
+                    </strong>
+
+                    <span>点赞数量</span>
+                </div>
+            </article>
+
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">📄</span>
+
+                <div>
+                    <strong>
+                        {{ script.line_count or 0 }}
+                    </strong>
+
+                    <span>代码总行数</span>
+                </div>
+            </article>
+
+            <article class="detail-stat-card">
+                <span class="detail-stat-icon">⌨️</span>
+
+                <div>
+                    <strong>
+                        {{ script.non_empty_line_count or 0 }}
+                    </strong>
+
+                    <span>有效代码行</span>
+                </div>
+            </article>
+        </section>
+
+        <section class="detail-main-grid">
+            <div class="detail-content-column">
+                {% if script.description %}
+                    <article class="detail-panel">
+                        <div class="detail-panel-heading">
+                            <span class="panel-icon">📝</span>
+
+                            <div>
+                                <h2>脚本说明</h2>
+
+                                <p>
+                                    这个脚本的用途和使用场景
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="detail-description">
+                            {{ script.description }}
+                        </div>
+                    </article>
+                {% endif %}
+
+                {% if warnings %}
+                    <article class="risk-panel">
+                        <div class="risk-panel-heading">
+                            <span class="risk-icon">⚠️</span>
+
+                            <div>
+                                <h2>运行前请注意</h2>
+
+                                <p>
+                                    系统根据代码关键词发现以下潜在操作
+                                </p>
+                            </div>
+                        </div>
+
+                        <ul class="risk-list">
+                            {% for warning in warnings %}
+                                <li>
+                                    {{ warning }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <p class="risk-footnote">
+                            这只是基础关键词分析，
+                            不代表完整的安全审计。
+                            运行陌生代码前请先阅读代码，
+                            并备份重要文件。
+                        </p>
+                    </article>
+                {% endif %}
+
+                <article class="code-section detail-code-panel">
+                    <div class="code-header detail-code-header">
+                        <div>
+                            <h2>脚本代码</h2>
+
+                            <p>
+                                {{ script.language }}
+                                ·
+                                {{ script.line_count or 0 }} 行
+                            </p>
+                        </div>
+
+                        <div class="detail-action-group">
+                            {% if session.get("user_id") %}
+                                <button
+                                    id="favorite-button"
+                                    type="button"
+                                    class="
+                                        button
+                                        {% if user_has_favorited %}
+                                            button-favorited
+                                        {% else %}
+                                            button-outline
+                                        {% endif %}
+                                    "
+                                    onclick="toggleFavorite()"
+                                >
+                                    <span id="favorite-button-text">
+                                    {% if user_has_favorited %}
+                                        ★ 已收藏
+                                    {% else %}
+                                        ☆ 收藏
+                                    {% endif %}
+                                    </span>
+                                </button>
+
+                                <button
+                                    id="like-button"
+                                    type="button"
+                                    class="
+                                        button
+                                        {% if user_has_liked %}
+                                            button-liked
+                                        {% else %}
+                                            button-outline
+                                        {% endif %}
+                                    "
+                                    onclick="toggleLike()"
+                                >
+                                    <span id="like-button-text">
+                                    {% if user_has_liked %}
+                                        ♥ 已点赞
+                                    {% else %}
+                                        ♡ 点赞
+                                    {% endif %}
+                                    </span>
+                                </button>
+
+                            {% else %}
+                                <a
+                                    class="button button-outline"
+                                    href="/login"
+                                >
+                                    登录后互动
+                                </a>
+                            {% endif %}
+
+                            <a
+                                class="
+                                    button
+                                    button-secondary
+                                "
+                                href="{{
+                                    url_for(
+                                        'download_script',
+                                        script_id=script.id
+                                    )
+                                }}"
+                                title="下载后请先阅读代码和安全提示"
+                            >
+                                ⬇ 下载脚本
+                            </a>
+
+                            <button
+                                id="copy-button"
+                                type="button"
+                                class="button button-primary"
+                                onclick="copyCode()"
+                            >
+                                📋 复制代码
+                            </button>
+                        </div>
+                    </div>
+
+                    <pre><code
+                        id="script-code"
+                        class="language-{{ script.language|lower }}"
+                    >{{ script.code }}</code></pre>
+
+                    <div
+                        id="copy-message"
+                        class="copy-message"
+                        aria-live="polite"
+                    ></div>
+                </article>
+            </div>
+
+            <aside class="detail-sidebar">
+                <article class="detail-side-card">
+                    <h3>脚本信息</h3>
+
+                    <dl class="detail-info-list">
+                        <div>
+                            <dt>作者</dt>
+
+                            <dd>
+                                {{
+                                    script.author_name
+                                    or "匿名用户"
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>语言</dt>
+
+                            <dd>
+                                {{ script.language }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>分类</dt>
+
+                            <dd>
+                                {{
+                                    script.category
+                                    or "其他"
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>发布时间</dt>
+
+                            <dd>
+                                {{
+                                    script.reviewed_at
+                                    or script.created_at
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>脚本编号</dt>
+
+                            <dd>
+                                #{{ script.id }}
+                            </dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <article class="detail-side-card safety-side-card">
+                    <span class="safety-side-icon">🛡️</span>
+
+                    <h3>安全提示</h3>
+
+                    <p>
+                        不要直接运行不了解的代码。
+                        请先检查文件路径、网络请求和删除操作。
+                    </p>
+                </article>
+            </aside>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>
+            ScriptHub Campus ·
+            让重复劳动少一点
+        </p>
+    </footer>
+
+<script>
+    async function toggleFavorite() {
+        const favoriteButton =
+            document.getElementById(
+                "favorite-button"
+            );
+
+        const favoriteButtonText =
+            document.getElementById(
+                "favorite-button-text"
+            );
+
+        if (!favoriteButton) {
+            return;
+        }
+
+        favoriteButton.disabled = true;
+
+        const favoriteUrl =
+            window.location.pathname
+            + "/favorite";
+
+        try {
+            const response = await fetch(
+                favoriteUrl,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message
+                    || "收藏操作失败。"
+                );
+            }
+
+            if (result.favorited) {
+                favoriteButton.classList.remove(
+                    "button-outline"
+                );
+
+                favoriteButton.classList.add(
+                    "button-favorited"
+                );
+
+                favoriteButtonText.textContent =
+                    "★ 已收藏";
+
+            } else {
+                favoriteButton.classList.remove(
+                    "button-favorited"
+                );
+
+                favoriteButton.classList.add(
+                    "button-outline"
+                );
+
+                favoriteButtonText.textContent =
+                    "☆ 收藏";
+            }
+
+        } catch (error) {
+            alert(error.message);
+
+        } finally {
+            favoriteButton.disabled = false;
+        }
+    }
+
+
+    async function toggleLike() {
+        const likeButton =
+            document.getElementById("like-button");
+
+        const likeButtonText =
+            document.getElementById("like-button-text");
+
+        const likeCount =
+            document.getElementById("like-count");
+
+        if (!likeButton) {
+            return;
+        }
+
+        likeButton.disabled = true;
+
+        const likeUrl =
+            window.location.pathname + "/like";
+
+        try {
+            const response = await fetch(
+                likeUrl,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message ||
+                    "点赞操作失败。"
+                );
+            }
+
+            likeCount.textContent =
+                result.like_count;
+
+            if (result.liked) {
+                likeButton.classList.remove(
+                    "button-outline"
+                );
+
+                likeButton.classList.add(
+                    "button-liked"
+                );
+
+                likeButtonText.textContent =
+                    "♥ 已点赞";
+
+            } else {
+                likeButton.classList.remove(
+                    "button-liked"
+                );
+
+                likeButton.classList.add(
+                    "button-outline"
+                );
+
+                likeButtonText.textContent =
+                    "♡ 点赞";
+            }
+
+        } catch (error) {
+            alert(error.message);
+
+        } finally {
+            likeButton.disabled = false;
+        }
+    }
+
+
+    async function copyCode() {
+        const codeElement =
+            document.getElementById("script-code");
+
+        const copyButton =
+            document.getElementById("copy-button");
+
+        const copyMessage =
+            document.getElementById("copy-message");
+
+        const copyCount =
+            document.getElementById("copy-count");
+
+        const codeText =
+            codeElement.innerText;
+
+        const copyUrl =
+            window.location.pathname + "/copy";
+
+        try {
+            await navigator.clipboard.writeText(
+                codeText
+            );
+
+            copyButton.textContent =
+                "✓ 已复制";
+
+            copyMessage.textContent =
+                "代码已经复制到剪贴板。";
+
+            copyMessage.className =
+                "copy-message copy-message-success";
+
+            const response = await fetch(
+                copyUrl,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            if (response.ok) {
+                const result =
+                    await response.json();
+
+                copyCount.textContent =
+                    result.copy_count;
+            }
+
+            setTimeout(function () {
+                copyButton.textContent =
+                    "📋 复制代码";
+
+                copyMessage.textContent =
+                    "";
+
+                copyMessage.className =
+                    "copy-message";
+            }, 2000);
+
+        } catch (error) {
+            copyMessage.textContent =
+                "复制失败，请手动选择代码复制。";
+
+            copyMessage.className =
+                "copy-message copy-message-error";
+        }
+    }
+</script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
+    ></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"
+    ></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"
+    ></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"
+    ></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"
+    ></script>
+</body>
+</html>

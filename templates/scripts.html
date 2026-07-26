@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脚本列表 - ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/scripts" class="active">脚本库</a>
+            <a href="/upload">上传脚本</a>
+            <a href="/ai-test">AI 助手</a>
+            <a href="/pet-generator">桌宠工坊</a>
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+            ☰
+        </button>
+    </nav>
+
+    <div class="container">
+        <h1>📂 脚本库</h1>
+        <p class="subtitle">这里展示所有已经审核通过的脚本。</p>
+
+        <!-- 搜索和分类筛选 -->
+        <form class="search-form" action="/scripts" method="get">
+            <div class="search-row">
+                <div class="search-group">
+                    <label for="search">搜索脚本</label>
+                    <input id="search" type="text" name="q" value="{{ search }}"
+                        placeholder="输入标题、说明或代码关键词">
+                </div>
+                <div class="search-group">
+                    <label for="category">脚本分类</label>
+                    <select id="category" name="category">
+                        <option value="">全部分类</option>
+                        {% for item in categories %}
+                            <option value="{{ item.category }}"
+                                {% if item.category == selected_category %}selected{% endif %}>
+                                {{ item.category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="search-group">
+                    <label for="language">编程语言</label>
+                    <select id="language" name="language">
+                        <option value="">全部语言</option>
+                        {% for item in languages %}
+                            <option
+                                value="{{ item.language }}"
+                                {% if item.language == selected_language %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ item.language }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="search-actions">
+                    <button type="submit" class="button button-primary">🔍 搜索</button>
+                    <a class="button button-outline" href="/scripts">清除</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- 脚本列表 -->
+        <div class="script-list">
+            {% for script in scripts %}
+                <div class="script-card">
+                    <div class="card-header">
+                        <h2>{{ script.title }}</h2>
+                        <span class="lang-badge">{{ script.language }}</span>
+                    </div>
+                    <div class="card-meta">
+                        <span class="category-tag">{{ script.category }}</span>
+                        <span class="time">📅 {{ script.created_at }}</span>
+                    </div>
+                    {% if script.description %}
+                        <p class="card-desc">{{ script.description }}</p>
+                    {% endif %}
+                    <a class="button button-primary" href="{{ url_for('script_detail', script_id=script.id) }}">
+                        查看详情 →
+                    </a>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h2>没有找到相关脚本</h2>
+                    <p>可以尝试更换关键词，或者清除分类筛选。</p>
+                    <a class="button button-primary" href="/upload">上传一个脚本</a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a
+                    class="page-btn"
+                    href="{{
+                        url_for(
+                            'scripts',
+                            page=current_page-1,
+                            q=search,
+                            category=selected_category,
+                            language=selected_language
+                        )
+                    }}"
+                >
+                    ← 上一页
+                </a>
+            {% else %}
+                <span class="page-btn disabled">← 上一页</span>
+            {% endif %}
+
+            <span class="page-info">第 {{ current_page }} / {{ total_pages }} 页</span>
+
+            {% if current_page < total_pages %}
+                <a
+                    class="page-btn"
+                    href="{{
+                        url_for(
+                            'scripts',
+                            page=current_page+1,
+                            q=search,
+                            category=selected_category,
+                            language=selected_language
+                        )
+                    }}"
+                >
+                    下一页 →
+                </a>
+            {% else %}
+                <span class="page-btn disabled">下一页 →</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <p>ScriptHub Campus · 让重复劳动少一点</p>
+    </footer>
+</body>
+</html>

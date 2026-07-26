@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        上传脚本 - ScriptHub Campus
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+
+            <a href="/">
+                ScriptHub Campus
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+
+            <a href="/scripts">
+                脚本库
+            </a>
+
+            <a
+                href="/upload"
+                class="active"
+            >
+                上传脚本
+            </a>
+
+            <a href="/my/scripts">
+                我的投稿
+            </a>
+
+            <a href="/ai-test">
+                AI 助手
+            </a>
+
+            <a href="/pet-generator">
+                桌宠工坊
+            </a>
+
+            <form
+                action="/logout"
+                method="post"
+                class="nav-logout-form"
+            >
+                <button
+                    type="submit"
+                    class="nav-logout-button"
+                >
+                    退出登录
+                </button>
+            </form>
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            onclick="
+                document
+                    .querySelector('.nav-links')
+                    .classList
+                    .toggle('open')
+            "
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="container">
+        <h1>📤 上传脚本</h1>
+
+        <p class="subtitle">
+            当前投稿者：
+            <strong>{{ current_username }}</strong>。
+
+            审核通过后，
+            所有人都能看到你的脚本。
+        </p>
+
+        <form
+            class="upload-form"
+            action="/upload"
+            method="post"
+        >
+            <div class="form-group">
+                <label for="title">
+                    脚本标题
+                    <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="例如：批量重命名文件脚本"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="description">
+                    脚本说明
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="简单说说这个脚本是干什么的"
+                ></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">
+                        脚本分类
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                    >
+                        <option value="学习辅助">
+                            学习辅助
+                        </option>
+
+                        <option value="文件处理">
+                            文件处理
+                        </option>
+
+                        <option value="PDF工具">
+                            PDF工具
+                        </option>
+
+                        <option value="Excel工具">
+                            Excel工具
+                        </option>
+
+                        <option value="生活效率">
+                            生活效率
+                        </option>
+
+                        <option value="其他">
+                            其他
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="language">
+                        脚本语言
+                    </label>
+
+                    <select
+                        id="language"
+                        name="language"
+                    >
+                        <option value="Python">
+                            Python
+                        </option>
+
+                        <option value="PowerShell">
+                            PowerShell
+                        </option>
+
+                        <option value="JavaScript">
+                            JavaScript
+                        </option>
+
+                        <option value="Bash">
+                            Bash
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="code">
+                    脚本代码
+                    <span class="required">*</span>
+                </label>
+
+                <textarea
+                    id="code"
+                    name="code"
+                    rows="16"
+                    placeholder="把你的脚本代码粘贴到这里"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    🚀 提交脚本
+                </button>
+
+                <a
+                    class="button button-outline"
+                    href="/"
+                >
+                    返回首页
+                </a>
+            </div>
+        </form>
+    </main>
+
+    <footer class="footer">
+        <p>
+            ScriptHub Campus ·
+            让重复劳动少一点
+        </p>
+    </footer>
+</body>
+</html>

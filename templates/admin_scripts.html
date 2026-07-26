@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脚本审核后台 - ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/scripts">脚本库</a>
+            <a href="/upload">上传脚本</a>
+            <a href="/ai-test">AI 助手</a>
+            <form action="/logout" method="post" class="nav-logout-form">
+                <button type="submit" class="nav-logout-button">退出登录</button>
+            </form>
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+            ☰
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="admin-heading-row">
+            <div>
+                <h1>🔧 脚本审核后台</h1>
+                <p class="subtitle">
+                    当前管理员：{{ current_admin }}
+                </p>
+            </div>
+            <span class="admin-security-badge">🔒 已登录</span>
+        </div>
+
+        <div class="admin-filter">
+            <a class="filter-btn {% if selected_status == 'pending' %}active{% endif %}"
+               href="/admin/scripts?status=pending">
+                ⏳ 待审核
+            </a>
+            <a class="filter-btn {% if selected_status == 'approved' %}active{% endif %}"
+               href="/admin/scripts?status=approved">
+                ✅ 已通过
+            </a>
+            <a class="filter-btn {% if selected_status == 'rejected' %}active{% endif %}"
+               href="/admin/scripts?status=rejected">
+                ❌ 已拒绝
+            </a>
+            <a class="filter-btn {% if selected_status == 'all' %}active{% endif %}"
+               href="/admin/scripts?status=all">
+                📋 全部
+            </a>
+        </div>
+
+        <div class="script-list">
+            {% for script in scripts %}
+                <div class="script-card admin-card">
+                    <div class="card-header">
+                        <h2>{{ script.title }}</h2>
+                        <span class="status-badge status-{{ script.status }}">
+                            {% if script.status == 'pending' %}⏳ 待审核
+                            {% elif script.status == 'approved' %}✅ 已通过
+                            {% elif script.status == 'rejected' %}❌ 已拒绝
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card-meta">
+                        <span><strong>ID:</strong> {{ script.id }}</span>
+                        <span class="lang-badge">{{ script.language }}</span>
+                        <span class="category-tag">{{ script.category }}</span>
+                        <span class="time">📅 {{ script.created_at }}</span>
+                    </div>
+                    {% if script.description %}
+                        <p class="card-desc">{{ script.description }}</p>
+                    {% endif %}
+                    <div class="code-preview">
+                        <pre><code class="language-{{ script.language|lower }}">{{ script.code }}</code></pre>
+                    </div>
+
+                    {% if script.status == "pending" %}
+                        <div class="admin-actions">
+                            <form action="/admin/scripts/{{ script.id }}/approve" method="post" style="display:inline;">
+                                <button type="submit" class="button button-primary">✅ 通过</button>
+                            </form>
+                            <form action="/admin/scripts/{{ script.id }}/reject" method="post" style="display:inline;">
+                                <button type="submit" class="button button-danger">❌ 拒绝</button>
+                            </form>
+                        </div>
+                    {% elif script.status == "approved" %}
+                        <p class="status-msg approved">这个脚本已经审核通过。</p>
+                    {% elif script.status == "rejected" %}
+                        <p class="status-msg rejected">这个脚本已被拒绝。</p>
+                    {% endif %}
+
+                    <form action="/admin/scripts/{{ script.id }}/delete" method="post"
+                          class="delete-form"
+                          onsubmit="return confirm('确定要永久删除这个脚本吗？此操作无法恢复。');">
+                        <input type="hidden" name="status" value="{{ selected_status }}">
+                        <button type="submit" class="button button-danger button-sm">🗑️ 删除脚本</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h2>暂无脚本</h2>
+                    <p>目前还没有待审核或已上传的脚本。</p>
+                    <a class="button button-primary" href="/upload">上传测试脚本</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>ScriptHub Campus · 让重复劳动少一点</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

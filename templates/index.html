@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+        <div class="nav-links">
+            <a
+                href="/"
+                class="active"
+            >
+                首页
+            </a>
+
+            <a href="/scripts">
+                脚本库
+            </a>
+
+            <a href="/upload">
+                上传脚本
+            </a>
+
+            <a href="/ai-test">
+                AI 助手
+            </a>
+
+            <a href="/pet-generator">
+                桌宠工坊
+            </a>
+
+            {% if session.get("user_id") %}
+                <a href="/my/scripts">
+                    我的投稿
+                </a>
+
+                <form
+                    action="/logout"
+                    method="post"
+                    class="nav-logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="nav-logout-button"
+                    >
+                        退出登录
+                    </button>
+                </form>
+
+            {% else %}
+                <a href="/login">
+                    登录
+                </a>
+
+                <a
+                    href="/register"
+                    class="nav-register-link"
+                >
+                    注册
+                </a>
+            {% endif %}
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+            ☰
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>ScriptHub Campus</h1>
+            <p>大学生日常脚本库：收集学习和生活中能减少重复劳动的小脚本。</p>
+            <div class="hero-actions">
+                <a class="button button-primary" href="/upload">📤 上传一个脚本</a>
+                <a class="button button-secondary" href="/scripts">📂 浏览脚本库</a>
+                <a class="button button-outline" href="/pet-generator">✨ 制作桌宠</a>
+            </div>
+        </div>
+
+        <div class="features">
+            <a
+                class="feature-card"
+                href="/scripts?language=Python"
+                aria-label="浏览 Python 脚本"
+            >
+                <div class="feature-icon">🐍</div>
+                <h3>Python</h3>
+                <p>数据处理、自动化、爬虫、作业辅助</p>
+            </a>
+
+            <a
+                class="feature-card"
+                href="/scripts?language=PowerShell"
+                aria-label="浏览 PowerShell 脚本"
+            >
+                <div class="feature-icon">⚡</div>
+                <h3>PowerShell</h3>
+                <p>系统管理、文件批处理、环境配置</p>
+            </a>
+
+            <a
+                class="feature-card"
+                href="/scripts?language=JavaScript"
+                aria-label="浏览 JavaScript 脚本"
+            >
+                <div class="feature-icon">🌐</div>
+                <h3>JavaScript</h3>
+                <p>浏览器插件、网页自动化、Node 工具</p>
+            </a>
+
+            <a
+                class="feature-card"
+                href="/scripts?language=Bash"
+                aria-label="浏览 Bash 脚本"
+            >
+                <div class="feature-icon">🖥️</div>
+                <h3>Bash</h3>
+                <p>Linux/Mac 命令行工具、服务器运维</p>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>ScriptHub Campus · 让重复劳动少一点</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

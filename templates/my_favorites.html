@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        我的收藏 - ScriptHub Campus
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+
+            <a href="/">
+                ScriptHub Campus
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+
+            <a href="/scripts">
+                脚本库
+            </a>
+
+            <a href="/upload">
+                上传脚本
+            </a>
+
+            <a href="/pet-generator">
+                桌宠工坊
+            </a>
+
+            <a href="/my/scripts">
+                我的投稿
+            </a>
+
+            <a
+                href="/my/favorites"
+                class="active"
+            >
+                我的收藏
+            </a>
+
+            <form
+                action="/logout"
+                method="post"
+                class="nav-logout-form"
+            >
+                <button
+                    type="submit"
+                    class="nav-logout-button"
+                >
+                    退出登录
+                </button>
+            </form>
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            onclick="
+                document
+                    .querySelector('.nav-links')
+                    .classList
+                    .toggle('open')
+            "
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="container">
+        <div class="account-heading">
+            <div>
+                <span class="section-kicker">
+                    MY FAVORITES
+                </span>
+
+                <h1>我的收藏</h1>
+
+                <p class="subtitle">
+                    保存你以后还会用到的脚本。
+                </p>
+            </div>
+
+            <a
+                class="button button-primary"
+                href="/scripts"
+            >
+                浏览脚本库
+            </a>
+        </div>
+
+        <div class="submission-list">
+            {% for script in scripts %}
+                <article class="submission-card">
+                    <div class="submission-main">
+                        <div class="submission-title-row">
+                            <h2>
+                                {{ script.title }}
+                            </h2>
+
+                            <span
+                                class="
+                                    status-badge
+                                    status-approved
+                                "
+                            >
+                                ★ 已收藏
+                            </span>
+                        </div>
+
+                        <div class="card-meta">
+                            <span class="lang-badge">
+                                {{ script.language }}
+                            </span>
+
+                            <span class="category-tag">
+                                {{ script.category or "其他" }}
+                            </span>
+
+                            <span class="time">
+                                收藏于 {{ script.favorited_at }}
+                            </span>
+                        </div>
+
+                        {% if script.description %}
+                            <p class="card-desc">
+                                {{ script.description }}
+                            </p>
+                        {% endif %}
+
+                        <div class="submission-stats">
+                            <span>
+                                👁️ {{ script.view_count or 0 }}
+                            </span>
+
+                            <span>
+                                ❤️ {{ script.like_count or 0 }}
+                            </span>
+
+                            <span>
+                                📋 {{ script.copy_count or 0 }}
+                            </span>
+
+                            <span>
+                                ⬇️ {{ script.download_count or 0 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="submission-actions">
+                        <a
+                            class="
+                                button
+                                button-outline
+                                button-sm
+                            "
+                            href="{{
+                                url_for(
+                                    'script_detail',
+                                    script_id=script.id
+                                )
+                            }}"
+                        >
+                            查看脚本
+                        </a>
+                    </div>
+                </article>
+
+            {% else %}
+                <section class="empty-state">
+                    <div class="empty-icon">⭐</div>
+
+                    <h2>还没有收藏脚本</h2>
+
+                    <p>
+                        在脚本详情页点击收藏，
+                        以后就能在这里快速找到。
+                    </p>
+
+                    <a
+                        class="button button-primary"
+                        href="/scripts"
+                    >
+                        浏览脚本库
+                    </a>
+                </section>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>
+            ScriptHub Campus ·
+            让重复劳动少一点
+        </p>
+    </footer>
+</body>
+</html>

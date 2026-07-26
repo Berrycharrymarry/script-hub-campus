@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        桌宠工坊 - ScriptHub Campus
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body class="pet-workshop-page">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+
+            <a href="/">
+                ScriptHub Campus
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+
+            <a href="/scripts">
+                脚本库
+            </a>
+
+            <a href="/upload">
+                上传脚本
+            </a>
+
+            <a href="/ai-test">
+                AI 助手
+            </a>
+
+            <a
+                href="/pet-generator"
+                class="active"
+            >
+                桌宠工坊
+            </a>
+
+            {% if session.get("user_id") %}
+                <a href="/my/scripts">
+                    我的投稿
+                </a>
+
+                <form
+                    action="/logout"
+                    method="post"
+                    class="nav-logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="nav-logout-button"
+                    >
+                        退出登录
+                    </button>
+                </form>
+
+            {% else %}
+                <a href="/login">
+                    登录
+                </a>
+            {% endif %}
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            aria-label="打开导航菜单"
+            onclick="
+                document
+                    .querySelector('.nav-links')
+                    .classList
+                    .toggle('open')
+            "
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="container pet-workshop">
+        <section class="pet-workshop-hero">
+            <div class="pet-hero-copy">
+                <span class="pet-kicker">
+                    DESKTOP PET STUDIO
+                </span>
+
+                <h1>
+                    把喜欢的图片，
+                    <span>变成会动的桌面伙伴。</span>
+                </h1>
+
+                <p>
+                    上传 PNG、GIF、WebP 或照片，
+                    配置待机、点击和拖动动作，
+                    即可生成安全轻量的
+                    <code>.petpack</code> 资源包。
+                </p>
+
+                <div class="pet-hero-actions">
+                    <a
+                        class="button button-primary"
+                        href="#pet-builder"
+                    >
+                        ✨ 开始制作
+                    </a>
+
+                    <a
+                        class="button button-outline"
+                        href="/downloads/desktop-pet-player"
+                    >
+                        ⬇ 下载桌宠播放器
+                    </a>
+                </div>
+            </div>
+
+            <div
+                class="pet-hero-visual"
+                aria-hidden="true"
+            >
+                <div class="pet-orbit pet-orbit-one"></div>
+                <div class="pet-orbit pet-orbit-two"></div>
+
+                <div class="pet-mascot-card">
+                    <span class="pet-mascot">🐱</span>
+                    <span class="pet-speech">
+                        今天也要少做重复劳动！
+                    </span>
+                </div>
+
+                <div class="pet-floating-badge badge-gif">
+                    GIF
+                </div>
+
+                <div class="pet-floating-badge badge-png">
+                    PNG
+                </div>
+
+                <div class="pet-floating-badge badge-webp">
+                    WebP
+                </div>
+            </div>
+        </section>
+
+        <section class="pet-quick-guide">
+            <article>
+                <span>01</span>
+                <div>
+                    <strong>先装播放器</strong>
+                    <p>只需安装一次，以后直接换资源包。</p>
+                </div>
+            </article>
+
+            <article>
+                <span>02</span>
+                <div>
+                    <strong>上传动作素材</strong>
+                    <p>静态图片和动态图片可以混合使用。</p>
+                </div>
+            </article>
+
+            <article>
+                <span>03</span>
+                <div>
+                    <strong>导入 petpack</strong>
+                    <p>生成后在播放器中选择导入即可。</p>
+                </div>
+            </article>
+        </section>
+
+        <section
+            id="pet-builder"
+            class="pet-builder-shell"
+        >
+            <div class="pet-builder-heading">
+                <div>
+                    <span class="section-kicker">
+                        BUILD YOUR PET
+                    </span>
+
+                    <h2>桌宠资源包生成器</h2>
+
+                    <p>
+                        最多上传 {{ max_files }} 个动作素材，
+                        单次上传总量不超过 32MB。
+                    </p>
+                </div>
+
+                <span class="pet-local-note">
+                    🛡️ 图片只用于本次生成
+                </span>
+            </div>
+
+            <form
+                id="pet-form"
+                class="pet-builder-grid"
+            >
+                <div class="pet-settings-column">
+                    <section class="pet-panel">
+                        <div class="pet-step-heading">
+                            <span>1</span>
+
+                            <div>
+                                <h3>基础信息</h3>
+                                <p>给桌宠起名并设置默认显示大小。</p>
+                            </div>
+                        </div>
+
+                        <div class="pet-field-grid">
+                            <label class="pet-field">
+                                <span>桌宠名称</span>
+
+                                <input
+                                    id="pet-name"
+                                    name="name"
+                                    value="我的桌宠"
+                                    maxlength="32"
+                                    autocomplete="off"
+                                >
+                            </label>
+
+                            <label class="pet-field">
+                                <span>
+                                    默认大小
+                                    <output
+                                        id="pet-size-output"
+                                        for="pet-size"
+                                    >
+                                        120px
+                                    </output>
+                                </span>
+
+                                <input
+                                    id="pet-size"
+                                    name="size"
+                                    type="range"
+                                    min="72"
+                                    max="320"
+                                    value="120"
+                                >
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="pet-panel">
+                        <div class="pet-step-heading">
+                            <span>2</span>
+
+                            <div>
+                                <h3>上传动作素材</h3>
+
+                                <p>
+                                    第一张建议设为待机，
+                                    第二张可设为点击动作。
+                                </p>
+                            </div>
+                        </div>
+
+                        <label
+                            id="pet-dropzone"
+                            class="pet-dropzone"
+                            for="pet-files"
+                        >
+                            <input
+                                id="pet-files"
+                                type="file"
+                                multiple
+                                accept=".gif,.png,.webp,.jpg,.jpeg,.bmp"
+                            >
+
+                            <span class="pet-drop-icon">＋</span>
+
+                            <strong>
+                                拖入图片，或点击选择
+                            </strong>
+
+                            <small>
+                                PNG · GIF · WebP · JPG · BMP
+                            </small>
+                        </label>
+
+                        <div class="pet-background-tool">
+                            <label class="pet-switch-row">
+                                <span>
+                                    <strong>尝试移除纯色背景</strong>
+
+                                    <small>
+                                        适合白底或单色底照片
+                                    </small>
+                                </span>
+
+                                <input
+                                    id="remove-background"
+                                    type="checkbox"
+                                >
+
+                                <span class="pet-switch"></span>
+                            </label>
+
+                            <label
+                                id="threshold-field"
+                                class="
+                                    pet-field
+                                    pet-threshold-field
+                                    is-hidden
+                                "
+                            >
+                                <span>
+                                    背景容差
+                                    <output
+                                        id="threshold-output"
+                                        for="background-threshold"
+                                    >
+                                        32
+                                    </output>
+                                </span>
+
+                                <input
+                                    id="background-threshold"
+                                    type="range"
+                                    min="0"
+                                    max="96"
+                                    value="32"
+                                >
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="pet-panel pet-download-panel">
+                        <div>
+                            <span class="pet-download-icon">🖥️</span>
+
+                            <div>
+                                <h3>还没有桌宠播放器？</h3>
+
+                                <p>
+                                    固定播放器只需下载一次，
+                                    后续换桌宠只需导入资源包。
+                                </p>
+                            </div>
+                        </div>
+
+                        <a
+                            class="button button-outline"
+                            href="/downloads/desktop-pet-player"
+                        >
+                            下载 Windows 播放器
+                        </a>
+                    </section>
+                </div>
+
+                <div class="pet-actions-column">
+                    <section class="pet-panel pet-actions-panel">
+                        <div class="pet-step-heading">
+                            <span>3</span>
+
+                            <div>
+                                <h3>配置动作</h3>
+
+                                <p id="pet-action-summary">
+                                    上传后可设置动作名称和触发方式。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="pet-empty-actions"
+                            class="pet-empty-actions"
+                        >
+                            <span>🎞️</span>
+                            <strong>还没有动作素材</strong>
+
+                            <p>
+                                上传图片后，
+                                这里会显示透明背景预览。
+                            </p>
+                        </div>
+
+                        <div
+                            id="pet-action-list"
+                            class="pet-action-list"
+                        ></div>
+                    </section>
+
+                    <section class="pet-submit-card">
+                        <div>
+                            <strong>
+                                准备好了吗？
+                            </strong>
+
+                            <p>
+                                生成后会自动下载
+                                <code>.petpack</code>。
+                            </p>
+                        </div>
+
+                        <button
+                            id="pet-submit"
+                            class="
+                                button
+                                button-primary
+                                pet-submit-button
+                            "
+                            type="submit"
+                        >
+                            ✨ 生成我的桌宠
+                        </button>
+
+                        <div
+                            id="pet-status"
+                            class="pet-status"
+                            role="status"
+                            aria-live="polite"
+                        ></div>
+                    </section>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>
+            ScriptHub Campus ·
+            让重复劳动少一点
+        </p>
+    </footer>
+
+    <script>
+        const petForm =
+            document.getElementById("pet-form");
+
+        const fileInput =
+            document.getElementById("pet-files");
+
+        const dropzone =
+            document.getElementById("pet-dropzone");
+
+        const actionList =
+            document.getElementById("pet-action-list");
+
+        const emptyActions =
+            document.getElementById("pet-empty-actions");
+
+        const actionSummary =
+            document.getElementById("pet-action-summary");
+
+        const sizeInput =
+            document.getElementById("pet-size");
+
+        const sizeOutput =
+            document.getElementById("pet-size-output");
+
+        const removeBackground =
+            document.getElementById(
+                "remove-background"
+            );
+
+        const thresholdField =
+            document.getElementById(
+                "threshold-field"
+            );
+
+        const thresholdInput =
+            document.getElementById(
+                "background-threshold"
+            );
+
+        const thresholdOutput =
+            document.getElementById(
+                "threshold-output"
+            );
+
+        const submitButton =
+            document.getElementById("pet-submit");
+
+        const statusBox =
+            document.getElementById("pet-status");
+
+        const maxFiles = {{ max_files }};
+
+        const roleOptions = [
+            {
+                value: "idle",
+                label: "随机待机"
+            },
+            {
+                value: "click",
+                label: "点击触发"
+            },
+            {
+                value: "drag",
+                label: "拖动时"
+            },
+            {
+                value: "sleep",
+                label: "休息睡觉"
+            },
+            {
+                value: "custom",
+                label: "动作菜单"
+            }
+        ];
+
+        let petActions = [];
+
+        function cleanActionName(fileName) {
+            return fileName
+                .replace(/\.[^.]+$/, "")
+                .slice(0, 24)
+                || "新动作";
+        }
+
+        function defaultRole(index) {
+            if (index === 0) {
+                return "idle";
+            }
+
+            if (index === 1) {
+                return "click";
+            }
+
+            return "custom";
+        }
+
+        function formatFileSize(size) {
+            if (size < 1024 * 1024) {
+                return (
+                    Math.max(
+                        1,
+                        Math.round(size / 1024)
+                    )
+                    + " KB"
+                );
+            }
+
+            return (
+                (size / 1024 / 1024)
+                    .toFixed(1)
+                + " MB"
+            );
+        }
+
+        function setStatus(message, state = "") {
+            statusBox.textContent = message;
+            statusBox.className =
+                "pet-status"
+                + (
+                    state
+                    ? " is-" + state
+                    : ""
+                );
+        }
+
+        function createRoleSelect(action) {
+            const select =
+                document.createElement("select");
+
+            select.setAttribute(
+                "aria-label",
+                "动作角色"
+            );
+
+            roleOptions.forEach(function (option) {
+                const element =
+                    document.createElement("option");
+
+                element.value = option.value;
+                element.textContent = option.label;
+                element.selected =
+                    action.role === option.value;
+
+                select.append(element);
+            });
+
+            select.addEventListener(
+                "change",
+                function () {
+                    action.role = select.value;
+                }
+            );
+
+            return select;
+        }
+
+        function renderActions() {
+            actionList.replaceChildren();
+
+            emptyActions.hidden =
+                petActions.length > 0;
+
+            actionSummary.textContent =
+                petActions.length > 0
+                ? (
+                    "已添加 "
+                    + petActions.length
+                    + " 个动作，可继续编辑。"
+                )
+                : "上传后可设置动作名称和触发方式。";
+
+            petActions.forEach(function (
+                action,
+                index
+            ) {
+                const card =
+                    document.createElement("article");
+
+                card.className = "pet-action-card";
+
+                const preview =
+                    document.createElement("img");
+
+                preview.src = action.previewUrl;
+                preview.alt =
+                    action.name + " 动作预览";
+
+                const body =
+                    document.createElement("div");
+
+                body.className =
+                    "pet-action-card-body";
+
+                const top =
+                    document.createElement("div");
+
+                top.className =
+                    "pet-action-card-top";
+
+                const order =
+                    document.createElement("span");
+
+                order.className =
+                    "pet-action-order";
+
+                order.textContent =
+                    String(index + 1)
+                        .padStart(2, "0");
+
+                const fileMeta =
+                    document.createElement("span");
+
+                fileMeta.className =
+                    "pet-action-file";
+
+                fileMeta.textContent =
+                    action.file.name
+                    + " · "
+                    + formatFileSize(
+                        action.file.size
+                    );
+
+                const removeButton =
+                    document.createElement("button");
+
+                removeButton.type = "button";
+                removeButton.className =
+                    "pet-action-remove";
+
+                removeButton.textContent = "移除";
+                removeButton.setAttribute(
+                    "aria-label",
+                    "移除 " + action.file.name
+                );
+
+                removeButton.addEventListener(
+                    "click",
+                    function () {
+                        URL.revokeObjectURL(
+                            action.previewUrl
+                        );
+
+                        petActions.splice(index, 1);
+                        renderActions();
+                    }
+                );
+
+                top.append(
+                    order,
+                    fileMeta,
+                    removeButton
+                );
+
+                const fields =
+                    document.createElement("div");
+
+                fields.className =
+                    "pet-action-fields";
+
+                const nameLabel =
+                    document.createElement("label");
+
+                nameLabel.textContent = "动作名称";
+
+                const nameInput =
+                    document.createElement("input");
+
+                nameInput.value = action.name;
+                nameInput.maxLength = 24;
+                nameInput.setAttribute(
+                    "aria-label",
+                    "动作名称"
+                );
+
+                nameInput.addEventListener(
+                    "input",
+                    function () {
+                        action.name =
+                            nameInput.value;
+                    }
+                );
+
+                nameLabel.append(nameInput);
+
+                const roleLabel =
+                    document.createElement("label");
+
+                roleLabel.textContent = "触发方式";
+                roleLabel.append(
+                    createRoleSelect(action)
+                );
+
+                fields.append(
+                    nameLabel,
+                    roleLabel
+                );
+
+                body.append(top, fields);
+                card.append(preview, body);
+                actionList.append(card);
+            });
+        }
+
+        function addFiles(fileList) {
+            const acceptedExtensions = [
+                ".gif",
+                ".png",
+                ".webp",
+                ".jpg",
+                ".jpeg",
+                ".bmp"
+            ];
+
+            const incoming = Array.from(
+                fileList
+            ).filter(function (file) {
+                const lowerName =
+                    file.name.toLowerCase();
+
+                return acceptedExtensions.some(
+                    function (extension) {
+                        return lowerName.endsWith(
+                            extension
+                        );
+                    }
+                );
+            });
+
+            const remaining =
+                maxFiles - petActions.length;
+
+            if (remaining <= 0) {
+                setStatus(
+                    "最多只能添加 "
+                    + maxFiles
+                    + " 个动作。",
+                    "error"
+                );
+
+                return;
+            }
+
+            incoming
+                .slice(0, remaining)
+                .forEach(function (file) {
+                    const index =
+                        petActions.length;
+
+                    petActions.push({
+                        file: file,
+                        name: cleanActionName(
+                            file.name
+                        ),
+                        role: defaultRole(index),
+                        previewUrl:
+                            URL.createObjectURL(file)
+                    });
+                });
+
+            if (incoming.length > remaining) {
+                setStatus(
+                    "只添加了前 "
+                    + remaining
+                    + " 个文件。",
+                    "error"
+                );
+
+            } else if (incoming.length === 0) {
+                setStatus(
+                    "请选择 PNG、GIF、WebP、"
+                    + "JPG 或 BMP 文件。",
+                    "error"
+                );
+
+            } else {
+                setStatus("");
+            }
+
+            renderActions();
+            fileInput.value = "";
+        }
+
+        fileInput.addEventListener(
+            "change",
+            function () {
+                addFiles(fileInput.files);
+            }
+        );
+
+        [
+            "dragenter",
+            "dragover"
+        ].forEach(function (eventName) {
+            dropzone.addEventListener(
+                eventName,
+                function (event) {
+                    event.preventDefault();
+                    dropzone.classList.add(
+                        "is-dragging"
+                    );
+                }
+            );
+        });
+
+        [
+            "dragleave",
+            "drop"
+        ].forEach(function (eventName) {
+            dropzone.addEventListener(
+                eventName,
+                function (event) {
+                    event.preventDefault();
+                    dropzone.classList.remove(
+                        "is-dragging"
+                    );
+                }
+            );
+        });
+
+        dropzone.addEventListener(
+            "drop",
+            function (event) {
+                addFiles(
+                    event.dataTransfer.files
+                );
+            }
+        );
+
+        sizeInput.addEventListener(
+            "input",
+            function () {
+                sizeOutput.textContent =
+                    sizeInput.value + "px";
+            }
+        );
+
+        thresholdInput.addEventListener(
+            "input",
+            function () {
+                thresholdOutput.textContent =
+                    thresholdInput.value;
+            }
+        );
+
+        removeBackground.addEventListener(
+            "change",
+            function () {
+                thresholdField.classList.toggle(
+                    "is-hidden",
+                    !removeBackground.checked
+                );
+            }
+        );
+
+        petForm.addEventListener(
+            "submit",
+            async function (event) {
+                event.preventDefault();
+
+                if (petActions.length === 0) {
+                    setStatus(
+                        "请先添加至少一个动作素材。",
+                        "error"
+                    );
+
+                    dropzone.focus();
+                    return;
+                }
+
+                const formData = new FormData();
+
+                petActions.forEach(function (action) {
+                    formData.append(
+                        "files",
+                        action.file,
+                        action.file.name
+                    );
+                });
+
+                const petName =
+                    document
+                        .getElementById("pet-name")
+                        .value
+                        .trim()
+                    || "我的桌宠";
+
+                formData.set("name", petName);
+                formData.set(
+                    "size",
+                    sizeInput.value
+                );
+
+                formData.set(
+                    "labels",
+                    JSON.stringify(
+                        petActions.map(
+                            function (action) {
+                                return (
+                                    action.name
+                                    || "新动作"
+                                );
+                            }
+                        )
+                    )
+                );
+
+                formData.set(
+                    "roles",
+                    JSON.stringify(
+                        petActions.map(
+                            function (action) {
+                                return action.role;
+                            }
+                        )
+                    )
+                );
+
+                formData.set(
+                    "remove_background",
+                    String(
+                        removeBackground.checked
+                    )
+                );
+
+                formData.set(
+                    "background_threshold",
+                    thresholdInput.value
+                );
+
+                submitButton.disabled = true;
+                submitButton.textContent =
+                    "正在生成资源包…";
+
+                setStatus(
+                    "正在处理图片和动画帧，"
+                    + "请稍候。",
+                    "loading"
+                );
+
+                try {
+                    const response = await fetch(
+                        "/api/desktop-packs",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                    if (!response.ok) {
+                        let message =
+                            "生成失败，请检查素材。";
+
+                        try {
+                            const result =
+                                await response.json();
+
+                            message =
+                                result.message
+                                || message;
+
+                        } catch (parseError) {
+                            if (
+                                response.status === 413
+                            ) {
+                                message =
+                                    "上传文件总量过大，"
+                                    + "请减少素材。";
+                            }
+                        }
+
+                        throw new Error(message);
+                    }
+
+                    const packageBlob =
+                        await response.blob();
+
+                    const downloadUrl =
+                        URL.createObjectURL(
+                            packageBlob
+                        );
+
+                    const downloadLink =
+                        document.createElement("a");
+
+                    downloadLink.href = downloadUrl;
+                    downloadLink.download =
+                        petName + ".petpack";
+
+                    document.body.append(
+                        downloadLink
+                    );
+
+                    downloadLink.click();
+                    downloadLink.remove();
+
+                    setTimeout(function () {
+                        URL.revokeObjectURL(
+                            downloadUrl
+                        );
+                    }, 1000);
+
+                    setStatus(
+                        "生成完成！请在桌宠播放器中"
+                        + "导入刚下载的资源包。",
+                        "success"
+                    );
+
+                } catch (error) {
+                    setStatus(
+                        error.message,
+                        "error"
+                    );
+
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent =
+                        "✨ 生成我的桌宠";
+                }
+            }
+        );
+
+        window.addEventListener(
+            "beforeunload",
+            function () {
+                petActions.forEach(
+                    function (action) {
+                        URL.revokeObjectURL(
+                            action.previewUrl
+                        );
+                    }
+                );
+            }
+        );
+    </script>
+</body>
+</html>

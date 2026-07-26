@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        我的投稿 - ScriptHub Campus
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+
+            <a href="/">
+                ScriptHub Campus
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+
+            <a href="/scripts">
+                脚本库
+            </a>
+
+            <a href="/upload">
+                上传脚本
+            </a>
+
+            <a href="/pet-generator">
+                桌宠工坊
+            </a>
+
+            <a
+                href="/my/scripts"
+                class="active"
+            >
+                我的投稿
+            </a>
+
+            <a href="/my/favorites">
+                我的收藏
+            </a>
+
+            <form
+                action="/logout"
+                method="post"
+                class="nav-logout-form"
+            >
+                <button
+                    type="submit"
+                    class="nav-logout-button"
+                >
+                    退出登录
+                </button>
+            </form>
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            onclick="
+                document
+                    .querySelector('.nav-links')
+                    .classList
+                    .toggle('open')
+            "
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="container">
+        <div class="account-heading">
+            <div>
+                <span class="section-kicker">
+                    MY SUBMISSIONS
+                </span>
+
+                <h1>我的投稿</h1>
+
+                <p class="subtitle">
+                    当前用户：
+                    {{ session.get("username") }}
+                </p>
+            </div>
+
+            <a
+                class="button button-primary"
+                href="/upload"
+            >
+                ＋ 上传新脚本
+            </a>
+        </div>
+
+        <div class="submission-list">
+            {% for script in scripts %}
+                <article class="submission-card">
+                    <div class="submission-main">
+                        <div class="submission-title-row">
+                            <h2>
+                                {{ script.title }}
+                            </h2>
+
+                            <span
+                                class="
+                                    status-badge
+                                    status-{{ script.status }}
+                                "
+                            >
+                                {% if script.status == "pending" %}
+                                    ⏳ 待审核
+
+                                {% elif script.status == "approved" %}
+                                    ✅ 已通过
+
+                                {% elif script.status == "rejected" %}
+                                    ❌ 已拒绝
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="card-meta">
+                            <span class="lang-badge">
+                                {{ script.language }}
+                            </span>
+
+                            <span class="category-tag">
+                                {{
+                                    script.category
+                                    or "其他"
+                                }}
+                            </span>
+
+                            <span class="time">
+                                📅 {{ script.created_at }}
+                            </span>
+                        </div>
+
+                        {% if script.description %}
+                            <p class="card-desc">
+                                {{ script.description }}
+                            </p>
+                        {% endif %}
+
+                        <div class="submission-stats">
+                            <span>
+                                代码行数：
+                                {{ script.line_count }}
+                            </span>
+
+                            <span>
+                                浏览：
+                                {{ script.view_count }}
+                            </span>
+
+                            <span>
+                                下载：
+                                {{ script.download_count or 0 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="submission-actions">
+                        {% if script.status == "approved" %}
+                            <a
+                                class="
+                                    button
+                                    button-outline
+                                    button-sm
+                                "
+                                href="{{
+                                    url_for(
+                                        'script_detail',
+                                        script_id=script.id
+                                    )
+                                }}"
+                            >
+                                查看公开页面
+                            </a>
+
+                        {% else %}
+                            <span class="submission-tip">
+                                {% if script.status == "pending" %}
+                                    审核完成后会公开显示。
+                                {% else %}
+                                    该投稿未通过审核。
+                                {% endif %}
+                            </span>
+                        {% endif %}
+                    </div>
+                </article>
+
+            {% else %}
+                <section class="empty-state">
+                    <div class="empty-icon">📝</div>
+
+                    <h2>还没有投稿</h2>
+
+                    <p>
+                        把一个真正帮你节省过时间的
+                        小脚本分享出来。
+                    </p>
+
+                    <a
+                        class="button button-primary"
+                        href="/upload"
+                    >
+                        上传第一个脚本
+                    </a>
+                </section>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>
+            ScriptHub Campus ·
+            让重复劳动少一点
+        </p>
+    </footer>
+</body>
+</html>
