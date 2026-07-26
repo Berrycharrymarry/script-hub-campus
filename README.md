@@ -62,3 +62,10 @@ python create_admin.py
 ## 部署说明
 
 GitHub 用于托管源代码，GitHub Pages 不能直接运行 Flask 服务。公网部署需要使用支持 Python Web 服务的平台，并在平台中配置环境变量和持久化数据库。
+
+仓库包含 `render.yaml`，可直接在 Render 中创建 Blueprint：
+
+- Render 自动安装依赖并使用 Gunicorn 启动 Flask。
+- `FLASK_SECRET_KEY` 由 Render 自动生成。
+- `DEEPSEEK_API_KEY` 需要在创建服务时作为私密环境变量填写。
+- 免费 Render Web Service 的文件系统是临时的，SQLite 用户和投稿数据会在服务休眠、重启或重新部署后重置；精选脚本会在启动时自动恢复。

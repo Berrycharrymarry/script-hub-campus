@@ -51,6 +51,12 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 # 降低部分跨站请求携带 Cookie 的风险
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
+# 公网部署时只通过 HTTPS 发送登录 Cookie
+app.config["SESSION_COOKIE_SECURE"] = (
+    os.getenv("APP_ENV", "development")
+    == "production"
+)
+
 # 桌宠资源包支持多张动画素材，单次请求最多约 36 MB。
 # 生成器内部还会分别检查单文件、总上传量和解码后像素数。
 app.config["MAX_CONTENT_LENGTH"] = (
@@ -453,6 +459,26 @@ def index():
         stats=stats,
         latest_scripts=latest_scripts
     )
+
+
+# =========================
+# 托管平台健康检查
+# =========================
+@app.route("/health")
+def health():
+    conn = get_db_connection()
+
+    try:
+        conn.execute(
+            "SELECT 1"
+        ).fetchone()
+
+    finally:
+        conn.close()
+
+    return {
+        "status": "ok"
+    }
 
 
 # =========================
