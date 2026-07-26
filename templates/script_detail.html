@@ -118,7 +118,11 @@
 
                     <div>
                         <p class="detail-kicker">
-                            COMMUNITY SCRIPT
+                            {% if script.is_curated %}
+                                CURATED USERSCRIPT
+                            {% else %}
+                                COMMUNITY SCRIPT
+                            {% endif %}
                         </p>
 
                         <h1>
@@ -139,7 +143,31 @@
                     <span class="detail-status">
                         ✓ 已审核
                     </span>
+
+                    {% if script.is_curated %}
+                        <span class="curated-badge">
+                            Greasy Fork 精选
+                        </span>
+                    {% endif %}
                 </div>
+
+                {% if script.tags_list %}
+                    <div class="detail-tag-list">
+                        {% for tag in script.tags_list %}
+                            <a
+                                class="script-tag"
+                                href="{{
+                                    url_for(
+                                        'scripts',
+                                        tag=tag
+                                    )
+                                }}"
+                            >
+                                # {{ tag }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="detail-author-box">
@@ -154,7 +182,11 @@
 
                 <div>
                     <span class="author-label">
-                        投稿者
+                        {% if script.is_curated %}
+                            原作者
+                        {% else %}
+                            投稿者
+                        {% endif %}
                     </span>
 
                     <strong>
@@ -180,17 +212,19 @@
                 </div>
             </article>
 
-            <article class="detail-stat-card">
-                <span class="detail-stat-icon">📋</span>
+            {% if not script.is_curated %}
+                <article class="detail-stat-card">
+                    <span class="detail-stat-icon">📋</span>
 
-                <div>
-                    <strong id="copy-count">
-                        {{ script.copy_count or 0 }}
-                    </strong>
+                    <div>
+                        <strong id="copy-count">
+                            {{ script.copy_count or 0 }}
+                        </strong>
 
-                    <span>复制次数</span>
-                </div>
-            </article>
+                        <span>复制次数</span>
+                    </div>
+                </article>
+            {% endif %}
 
             <article class="detail-stat-card">
                 <span class="detail-stat-icon">⬇️</span>
@@ -200,7 +234,13 @@
                         {{ script.download_count or 0 }}
                     </strong>
 
-                    <span>下载次数</span>
+                    <span>
+                        {% if script.is_curated %}
+                            安装跳转
+                        {% else %}
+                            下载次数
+                        {% endif %}
+                    </span>
                 </div>
             </article>
 
@@ -216,29 +256,31 @@
                 </div>
             </article>
 
-            <article class="detail-stat-card">
-                <span class="detail-stat-icon">📄</span>
+            {% if not script.is_curated %}
+                <article class="detail-stat-card">
+                    <span class="detail-stat-icon">📄</span>
 
-                <div>
-                    <strong>
-                        {{ script.line_count or 0 }}
-                    </strong>
+                    <div>
+                        <strong>
+                            {{ script.line_count or 0 }}
+                        </strong>
 
-                    <span>代码总行数</span>
-                </div>
-            </article>
+                        <span>代码总行数</span>
+                    </div>
+                </article>
 
-            <article class="detail-stat-card">
-                <span class="detail-stat-icon">⌨️</span>
+                <article class="detail-stat-card">
+                    <span class="detail-stat-icon">⌨️</span>
 
-                <div>
-                    <strong>
-                        {{ script.non_empty_line_count or 0 }}
-                    </strong>
+                    <div>
+                        <strong>
+                            {{ script.non_empty_line_count or 0 }}
+                        </strong>
 
-                    <span>有效代码行</span>
-                </div>
-            </article>
+                        <span>有效代码行</span>
+                    </div>
+                </article>
+            {% endif %}
         </section>
 
         <section class="detail-main-grid">
@@ -272,7 +314,11 @@
                                 <h2>运行前请注意</h2>
 
                                 <p>
-                                    系统根据代码关键词发现以下潜在操作
+                                    {% if script.is_curated %}
+                                        安装第三方脚本前需要了解的事项
+                                    {% else %}
+                                        系统根据代码关键词发现以下潜在操作
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
@@ -286,10 +332,17 @@
                         </ul>
 
                         <p class="risk-footnote">
-                            这只是基础关键词分析，
-                            不代表完整的安全审计。
-                            运行陌生代码前请先阅读代码，
-                            并备份重要文件。
+                            {% if script.is_curated %}
+                                本网站只做人工筛选与来源标注，
+                                不代表完整安全审计。
+                                安装前请在 Greasy Fork 查看最新版代码、
+                                权限和用户反馈。
+                            {% else %}
+                                这只是基础关键词分析，
+                                不代表完整的安全审计。
+                                运行陌生代码前请先阅读代码，
+                                并备份重要文件。
+                            {% endif %}
                         </p>
                     </article>
                 {% endif %}
@@ -297,12 +350,22 @@
                 <article class="code-section detail-code-panel">
                     <div class="code-header detail-code-header">
                         <div>
-                            <h2>脚本代码</h2>
+                            <h2>
+                                {% if script.is_curated %}
+                                    官方安装
+                                {% else %}
+                                    脚本代码
+                                {% endif %}
+                            </h2>
 
                             <p>
-                                {{ script.language }}
-                                ·
-                                {{ script.line_count or 0 }} 行
+                                {% if script.is_curated %}
+                                    安装文件由 Greasy Fork 官方提供
+                                {% else %}
+                                    {{ script.language }}
+                                    ·
+                                    {{ script.line_count or 0 }} 行
+                                {% endif %}
                             </p>
                         </div>
 
@@ -372,32 +435,69 @@
                                         script_id=script.id
                                     )
                                 }}"
-                                title="下载后请先阅读代码和安全提示"
+                                title="
+                                    {% if script.is_curated %}
+                                        前往 Greasy Fork 官方源安装
+                                    {% else %}
+                                        下载后请先阅读代码和安全提示
+                                    {% endif %}
+                                "
                             >
-                                ⬇ 下载脚本
+                                {% if script.is_curated %}
+                                    🧩 安装原版脚本
+                                {% else %}
+                                    ⬇ 下载脚本
+                                {% endif %}
                             </a>
 
-                            <button
-                                id="copy-button"
-                                type="button"
-                                class="button button-primary"
-                                onclick="copyCode()"
-                            >
-                                📋 复制代码
-                            </button>
+                            {% if not script.is_curated %}
+                                <button
+                                    id="copy-button"
+                                    type="button"
+                                    class="button button-primary"
+                                    onclick="copyCode()"
+                                >
+                                    📋 复制代码
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <pre><code
-                        id="script-code"
-                        class="language-{{ script.language|lower }}"
-                    >{{ script.code }}</code></pre>
+                    {% if script.is_curated %}
+                        <div class="curated-install-guide">
+                            <div class="curated-install-icon">🧩</div>
 
-                    <div
-                        id="copy-message"
-                        class="copy-message"
-                        aria-live="polite"
-                    ></div>
+                            <div>
+                                <h3>需要先安装用户脚本管理器</h3>
+
+                                <p>
+                                    在浏览器中安装 Tampermonkey、
+                                    Violentmonkey 或 ScriptCat，
+                                    再点击“安装原版脚本”。
+                                    安装页面会显示脚本申请的权限和完整代码。
+                                </p>
+
+                                <a
+                                    href="{{ script.source_url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    查看 Greasy Fork 原始页面 ↗
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <pre><code
+                            id="script-code"
+                            class="language-{{ script.language|lower }}"
+                        >{{ script.code }}</code></pre>
+
+                        <div
+                            id="copy-message"
+                            class="copy-message"
+                            aria-live="polite"
+                        ></div>
+                    {% endif %}
                 </article>
             </div>
 
@@ -437,7 +537,13 @@
                         </div>
 
                         <div>
-                            <dt>发布时间</dt>
+                            <dt>
+                                {% if script.is_curated %}
+                                    收录时间
+                                {% else %}
+                                    发布时间
+                                {% endif %}
+                            </dt>
 
                             <dd>
                                 {{
@@ -446,6 +552,46 @@
                                 }}
                             </dd>
                         </div>
+
+                        {% if script.is_curated %}
+                            <div>
+                                <dt>来源</dt>
+
+                                <dd>
+                                    <a
+                                        href="{{ script.source_url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ script.source_name }} ↗
+                                    </a>
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt>许可证</dt>
+
+                                <dd>
+                                    {{ script.license_name }}
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt>原版版本</dt>
+
+                                <dd>
+                                    {{ script.original_version }}
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt>原版更新</dt>
+
+                                <dd>
+                                    {{ script.source_updated_at }}
+                                </dd>
+                            </div>
+                        {% endif %}
 
                         <div>
                             <dt>脚本编号</dt>
@@ -463,8 +609,13 @@
                     <h3>安全提示</h3>
 
                     <p>
-                        不要直接运行不了解的代码。
-                        请先检查文件路径、网络请求和删除操作。
+                        {% if script.is_curated %}
+                            第三方脚本会在你访问的网页中运行。
+                            安装时请检查站点范围、网络访问和存储权限。
+                        {% else %}
+                            不要直接运行不了解的代码。
+                            请先检查文件路径、网络请求和删除操作。
+                        {% endif %}
                     </p>
                 </article>
             </aside>

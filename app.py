@@ -1,5 +1,6 @@
 import json
 import os
+from collections import Counter
 from functools import wraps
 from io import BytesIO
 from pathlib import Path
@@ -58,6 +59,75 @@ app.config["MAX_CONTENT_LENGTH"] = (
 
 # 网站启动时检查并初始化数据库
 init_db()
+
+
+def normalize_script_tags(raw_tags):
+    """把用户输入的标签整理为短小、去重的列表。"""
+    if isinstance(raw_tags, str):
+        normalized_text = raw_tags
+
+        for separator in ("，", "\n", "#"):
+            normalized_text = normalized_text.replace(
+                separator,
+                ","
+            )
+
+        candidates = normalized_text.split(",")
+
+    elif isinstance(raw_tags, list):
+        candidates = raw_tags
+
+    else:
+        candidates = []
+
+    tags = []
+    seen = set()
+
+    for candidate in candidates:
+        tag = str(candidate).strip()
+
+        if (
+            not tag
+            or len(tag) > 20
+            or tag.casefold() in seen
+        ):
+            continue
+
+        tags.append(tag)
+        seen.add(tag.casefold())
+
+        if len(tags) >= 6:
+            break
+
+    return tags
+
+
+def parse_script_tags(value):
+    """安全解析数据库中保存的 JSON 标签。"""
+    if not value:
+        return []
+
+    try:
+        parsed = json.loads(value)
+
+    except (
+        json.JSONDecodeError,
+        TypeError
+    ):
+        return []
+
+    return normalize_script_tags(parsed)
+
+
+def is_trusted_greasyfork_install_url(url):
+    """只允许精选条目跳转到 Greasy Fork 官方脚本源。"""
+    return (
+        isinstance(url, str)
+        and url.startswith(
+            "https://update.greasyfork.org/scripts/"
+        )
+        and url.endswith(".user.js")
+    )
 
 
 # =========================
@@ -422,6 +492,13 @@ def upload():
         ""
     ).strip()
 
+    tags = normalize_script_tags(
+        request.form.get(
+            "tags",
+            ""
+        )
+    )
+
     code = request.form.get(
         "code",
         ""
@@ -456,6 +533,7 @@ def upload():
                 description,
                 language,
                 category,
+                tags,
                 code,
                 status,
                 line_count,
@@ -465,7 +543,7 @@ def upload():
                 updated_at
             )
             VALUES (
-                ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?
             )
         """, (
@@ -475,6 +553,10 @@ def upload():
             description,
             language,
             category,
+            json.dumps(
+                tags,
+                ensure_ascii=False
+            ),
             code,
             "pending",
             analysis["line_count"],
@@ -514,6 +596,11 @@ def scripts():
         ""
     ).strip()
 
+    tag = request.args.get(
+        "tag",
+        ""
+    ).strip()[:20]
+
     page = request.args.get(
         "page",
         1,
@@ -537,13 +624,17 @@ def scripts():
             "("
             "title LIKE ? "
             "OR description LIKE ? "
-            "OR code LIKE ?"
+            "OR code LIKE ? "
+            "OR tags LIKE ? "
+            "OR author_name LIKE ?"
             ")"
         )
 
         keyword = f"%{search}%"
 
         params.extend([
+            keyword,
+            keyword,
             keyword,
             keyword,
             keyword
@@ -562,6 +653,20 @@ def scripts():
         )
 
         params.append(language)
+
+    if tag:
+        tag_json = json.dumps(
+            tag,
+            ensure_ascii=False
+        )
+
+        where_clauses.append(
+            "tags LIKE ?"
+        )
+
+        params.append(
+            f"%{tag_json}%"
+        )
 
     where_sql = " AND ".join(
         where_clauses
@@ -602,13 +707,22 @@ def scripts():
             LIMIT ? OFFSET ?
         """
 
-        script_list = conn.execute(
+        script_rows = conn.execute(
             sql,
             params + [
                 per_page,
                 offset
             ]
         ).fetchall()
+
+        script_list = []
+
+        for row in script_rows:
+            script = dict(row)
+            script["tags_list"] = parse_script_tags(
+                script.get("tags")
+            )
+            script_list.append(script)
 
         category_list = conn.execute("""
             SELECT DISTINCT category
@@ -628,8 +742,37 @@ def scripts():
             ORDER BY language
         """).fetchall()
 
+        tag_rows = conn.execute("""
+            SELECT tags
+            FROM scripts
+            WHERE status = 'approved'
+              AND tags IS NOT NULL
+              AND tags != '[]'
+        """).fetchall()
+
     finally:
         conn.close()
+
+    tag_counts = Counter()
+
+    for row in tag_rows:
+        tag_counts.update(
+            parse_script_tags(row["tags"])
+        )
+
+    tag_list = [
+        {
+            "name": name,
+            "count": count
+        }
+        for name, count in sorted(
+            tag_counts.items(),
+            key=lambda item: (
+                -item[1],
+                item[0]
+            )
+        )
+    ]
 
     return render_template(
         "scripts.html",
@@ -637,8 +780,10 @@ def scripts():
         search=search,
         selected_category=category,
         selected_language=language,
+        selected_tag=tag,
         categories=category_list,
         languages=language_list,
+        tags=tag_list,
         current_page=page,
         total_pages=total_pages
     )
@@ -727,6 +872,11 @@ def script_detail(script_id):
 
     finally:
         conn.close()
+
+    script = dict(script)
+    script["tags_list"] = parse_script_tags(
+        script.get("tags")
+    )
 
     try:
         warnings = json.loads(
@@ -834,7 +984,8 @@ def download_script(script_id):
                 id,
                 title,
                 language,
-                code
+                code,
+                install_url
             FROM scripts
             WHERE id = ?
               AND status = 'approved'
@@ -860,6 +1011,14 @@ def download_script(script_id):
 
     finally:
         conn.close()
+
+    if is_trusted_greasyfork_install_url(
+        script["install_url"]
+    ):
+        return redirect(
+            script["install_url"],
+            code=302
+        )
 
     language_key = (
         script["language"]

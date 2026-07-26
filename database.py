@@ -3,6 +3,8 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+from curated_scripts import seed_curated_scripts
+
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "scripts.db"
@@ -63,7 +65,15 @@ def add_missing_script_columns(conn):
         "download_count": "INTEGER NOT NULL DEFAULT 0",
         "like_count": "INTEGER NOT NULL DEFAULT 0",
         "updated_at": "TEXT",
-        "reviewed_at": "TEXT"
+        "reviewed_at": "TEXT",
+        "tags": "TEXT NOT NULL DEFAULT '[]'",
+        "source_name": "TEXT",
+        "source_url": "TEXT",
+        "install_url": "TEXT",
+        "license_name": "TEXT",
+        "original_version": "TEXT",
+        "source_updated_at": "TEXT",
+        "is_curated": "INTEGER NOT NULL DEFAULT 0"
     }
 
     missing_columns = [
@@ -102,6 +112,12 @@ def add_missing_script_columns(conn):
         WHERE updated_at IS NULL OR TRIM(updated_at) = ''
     """)
 
+    conn.execute("""
+        UPDATE scripts
+        SET tags = '[]'
+        WHERE tags IS NULL OR TRIM(tags) = ''
+    """)
+
 
 def init_db():
     """
@@ -137,6 +153,7 @@ def init_db():
                 description TEXT,
                 language TEXT NOT NULL,
                 category TEXT,
+                tags TEXT NOT NULL DEFAULT '[]',
                 code TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'pending',
                 review_note TEXT,
@@ -150,6 +167,13 @@ def init_db():
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 reviewed_at TEXT,
+                source_name TEXT,
+                source_url TEXT,
+                install_url TEXT,
+                license_name TEXT,
+                original_version TEXT,
+                source_updated_at TEXT,
+                is_curated INTEGER NOT NULL DEFAULT 0,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
             )
         """)
@@ -215,9 +239,18 @@ def init_db():
         """)
 
         conn.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_scripts_source_url
+            ON scripts (source_url)
+            WHERE source_url IS NOT NULL
+              AND TRIM(source_url) != ''
+        """)
+
+        conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_comments_script_id
             ON comments (script_id, id DESC)
         """)
+
+        seed_curated_scripts(conn)
 
         conn.commit()
 

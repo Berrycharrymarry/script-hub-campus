@@ -26,7 +26,10 @@
 
     <div class="container">
         <h1>📂 脚本库</h1>
-        <p class="subtitle">这里展示所有已经审核通过的脚本。</p>
+        <p class="subtitle">
+            这里展示所有已经审核通过的脚本，
+            也收录了来源与许可证清晰的第三方精选脚本。
+        </p>
 
         <!-- 搜索和分类筛选 -->
         <form class="search-form" action="/scripts" method="get">
@@ -73,23 +76,104 @@
             </div>
         </form>
 
+        {% if tags %}
+            <section class="tag-filter-panel" aria-label="脚本标签筛选">
+                <div class="tag-filter-heading">
+                    <strong>热门标签</strong>
+
+                    {% if selected_tag %}
+                        <a
+                            href="{{
+                                url_for(
+                                    'scripts',
+                                    q=search,
+                                    category=selected_category,
+                                    language=selected_language
+                                )
+                            }}"
+                        >
+                            清除标签
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="tag-filter-list">
+                    {% for item in tags %}
+                        <a
+                            class="
+                                script-tag
+                                {% if item.name == selected_tag %}
+                                    active
+                                {% endif %}
+                            "
+                            href="{{
+                                url_for(
+                                    'scripts',
+                                    q=search,
+                                    category=selected_category,
+                                    language=selected_language,
+                                    tag=item.name
+                                )
+                            }}"
+                        >
+                            # {{ item.name }}
+                            <span>{{ item.count }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
         <!-- 脚本列表 -->
         <div class="script-list">
             {% for script in scripts %}
                 <div class="script-card">
                     <div class="card-header">
                         <h2>{{ script.title }}</h2>
-                        <span class="lang-badge">{{ script.language }}</span>
+
+                        <div class="card-badge-row">
+                            {% if script.is_curated %}
+                                <span class="curated-badge">
+                                    ✓ Greasy Fork 精选
+                                </span>
+                            {% endif %}
+
+                            <span class="lang-badge">{{ script.language }}</span>
+                        </div>
                     </div>
                     <div class="card-meta">
                         <span class="category-tag">{{ script.category }}</span>
+                        <span>✍️ {{ script.author_name }}</span>
                         <span class="time">📅 {{ script.created_at }}</span>
                     </div>
+
+                    {% if script.tags_list %}
+                        <div class="card-tag-list">
+                            {% for tag in script.tags_list %}
+                                <a
+                                    class="script-tag"
+                                    href="{{
+                                        url_for(
+                                            'scripts',
+                                            tag=tag
+                                        )
+                                    }}"
+                                >
+                                    # {{ tag }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     {% if script.description %}
                         <p class="card-desc">{{ script.description }}</p>
                     {% endif %}
                     <a class="button button-primary" href="{{ url_for('script_detail', script_id=script.id) }}">
-                        查看详情 →
+                        {% if script.is_curated %}
+                            查看并安装 →
+                        {% else %}
+                            查看详情 →
+                        {% endif %}
                     </a>
                 </div>
             {% else %}
@@ -114,7 +198,8 @@
                             page=current_page-1,
                             q=search,
                             category=selected_category,
-                            language=selected_language
+                            language=selected_language,
+                            tag=selected_tag
                         )
                     }}"
                 >
@@ -135,7 +220,8 @@
                             page=current_page+1,
                             q=search,
                             category=selected_category,
-                            language=selected_language
+                            language=selected_language,
+                            tag=selected_tag
                         )
                     }}"
                 >

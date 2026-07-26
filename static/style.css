@@ -806,6 +806,142 @@ pre code {
     }
 }
 
+/* ========== Curated scripts and tags ========== */
+.tag-filter-panel {
+    margin-top: 16px;
+    padding: 18px 20px;
+    border: 1px solid #dbeafe;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #eff6ff, #ffffff);
+}
+
+.tag-filter-heading,
+.card-badge-row,
+.detail-tag-list,
+.card-tag-list,
+.tag-filter-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-filter-heading {
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.tag-filter-heading a {
+    color: var(--primary);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.script-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    background: #fff;
+    color: #475569;
+    font-size: 12px;
+    text-decoration: none;
+    transition: 0.18s ease;
+}
+
+.script-tag:hover,
+.script-tag.active {
+    border-color: #60a5fa;
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.script-tag span {
+    color: #94a3b8;
+}
+
+.card-badge-row {
+    justify-content: flex-end;
+}
+
+.card-tag-list {
+    margin: -2px 0 14px;
+}
+
+.curated-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.detail-tag-list {
+    margin-top: 12px;
+}
+
+.curated-install-guide {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+    padding: 26px;
+    border-top: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f0fdf4, #f8fafc);
+}
+
+.curated-install-icon {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border-radius: 16px;
+    background: #dcfce7;
+    font-size: 28px;
+}
+
+.curated-install-guide h3 {
+    margin-bottom: 6px;
+    color: #14532d;
+}
+
+.curated-install-guide p {
+    margin-bottom: 10px;
+    color: #475569;
+}
+
+.curated-install-guide a,
+.detail-info-list a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.form-help {
+    margin-top: 7px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .card-header {
+        align-items: flex-start;
+    }
+
+    .card-badge-row {
+        justify-content: flex-start;
+    }
+
+    .curated-install-guide {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* =========================================================
    Homepage upgrade
    ========================================================= */
