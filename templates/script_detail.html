@@ -343,7 +343,7 @@
                             {% if script.is_curated %}
                                 本网站只做人工筛选与来源标注，
                                 不代表完整安全审计。
-                                安装前请在 Greasy Fork 查看最新版代码、
+                                安装前请在 {{ script.source_name }} 查看最新版代码、
                                 权限和用户反馈。
                             {% else %}
                                 这只是基础关键词分析，
@@ -368,7 +368,7 @@
 
                             <p>
                                 {% if script.is_curated %}
-                                    安装文件由 Greasy Fork 官方提供
+                                    安装文件由 {{ script.source_name }} 官方提供
                                 {% else %}
                                     {{ script.language }}
                                     ·
@@ -445,7 +445,7 @@
                                 }}"
                                 title="
                                     {% if script.is_curated %}
-                                        前往 Greasy Fork 官方源安装
+                                        前往 {{ script.source_name }} 官方源安装
                                     {% else %}
                                         下载后请先阅读代码和安全提示
                                     {% endif %}
