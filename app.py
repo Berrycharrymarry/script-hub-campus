@@ -540,6 +540,16 @@ def health():
 
 
 # =========================
+# 用户脚本启动器安装指南
+# =========================
+@app.route("/script-managers")
+def script_managers():
+    return render_template(
+        "script_managers.html"
+    )
+
+
+# =========================
 # Neon Rail Runner WebGL 游戏
 # =========================
 @app.route("/games/neon-rail-runner")

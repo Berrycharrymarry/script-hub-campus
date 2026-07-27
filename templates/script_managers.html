@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="description"
+        content="ScriptHub Campus 的 ScriptCat 脚本猫与 Tampermonkey 篡改猴安装、权限开启、脚本安装和兼容性指南。"
+    >
+    <title>脚本启动器安装指南 - ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="manager-guide-page">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">📦</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/scripts">脚本库</a>
+            <a href="/script-managers" class="active">
+                启动器指南
+            </a>
+            <a href="/upload">上传脚本</a>
+            <a href="/ai-test">AI 助手</a>
+            <a href="/pet-generator">桌宠工坊</a>
+            <a href="/games/neon-rail-runner">游戏厅</a>
+
+            {% if session.get("user_id") %}
+                <a href="/my/scripts">我的投稿</a>
+
+                <form
+                    action="/logout"
+                    method="post"
+                    class="nav-logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="nav-logout-button"
+                    >
+                        退出登录
+                    </button>
+                </form>
+            {% else %}
+                <a href="/login">登录</a>
+            {% endif %}
+        </div>
+
+        <button
+            class="nav-toggle"
+            type="button"
+            aria-label="打开导航"
+            onclick="document.querySelector('.nav-links').classList.toggle('open')"
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main>
+        <section class="manager-hero">
+            <div class="manager-guide-shell manager-hero-grid">
+                <div>
+                    <p class="manager-kicker">
+                        USERSCRIPT MANAGER GUIDE
+                    </p>
+                    <h1>先装启动器，再装脚本</h1>
+                    <p class="manager-hero-copy">
+                        用户脚本不能单独运行，需要浏览器扩展负责安装、
+                        授权、更新和执行。本站主要推荐
+                        <strong>ScriptCat 脚本猫</strong>与
+                        <strong>Tampermonkey 篡改猴</strong>。
+                    </p>
+
+                    <div class="manager-hero-actions">
+                        <a
+                            class="button button-primary"
+                            href="#scriptcat"
+                        >
+                            安装脚本猫
+                        </a>
+                        <a
+                            class="button button-outline"
+                            href="#tampermonkey"
+                        >
+                            安装篡改猴
+                        </a>
+                    </div>
+                </div>
+
+                <aside class="manager-answer-card">
+                    <span class="manager-answer-label">
+                        先说结论
+                    </span>
+                    <h2>来源网站不等于硬性启动器要求</h2>
+                    <p>
+                        ScriptCat 来源的脚本默认推荐脚本猫；
+                        Greasy Fork 来源的脚本默认推荐篡改猴。
+                        但普通 <code>.user.js</code> 脚本通常可以在两者中运行，
+                        最终要看脚本使用的 API 和作者说明。
+                    </p>
+                </aside>
+            </div>
+        </section>
+
+        <div class="manager-guide-shell manager-guide-content">
+            <section
+                class="manager-section"
+                aria-labelledby="compatibility-title"
+            >
+                <div class="manager-section-heading">
+                    <span>01</span>
+                    <div>
+                        <p>COMPATIBILITY</p>
+                        <h2 id="compatibility-title">
+                            同一个脚本对启动器有要求吗？
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="manager-compat-grid">
+                    <article class="manager-compat-card is-compatible">
+                        <span class="manager-compat-status">
+                            通常都能运行
+                        </span>
+                        <h3>标准用户脚本</h3>
+                        <p>
+                            文件以 <code>.user.js</code> 结尾，
+                            只使用常见元数据和 <code>GM_*</code> API。
+                            这类脚本一般可在脚本猫和篡改猴中运行。
+                        </p>
+                    </article>
+
+                    <article class="manager-compat-card is-scriptcat">
+                        <span class="manager-compat-status">
+                            需要脚本猫
+                        </span>
+                        <h3>后台、定时或专属 API 脚本</h3>
+                        <p>
+                            作者写明“仅脚本猫”，或脚本需要后台常驻、
+                            <code>@cron</code> 定时任务、脚本猫扩展 API 时，
+                            请使用 ScriptCat。
+                        </p>
+                    </article>
+
+                    <article class="manager-compat-card is-tampermonkey">
+                        <span class="manager-compat-status">
+                            优先篡改猴
+                        </span>
+                        <h3>作者只测试了 Tampermonkey</h3>
+                        <p>
+                            如果说明明确要求 Tampermonkey，
+                            或依赖两者实现不同的 API，
+                            应按作者要求使用篡改猴。
+                        </p>
+                    </article>
+                </div>
+
+                <div class="manager-warning">
+                    <strong>不要重复运行：</strong>
+                    可以同时安装两个启动器，但不要在两个启动器中同时启用
+                    同一个脚本，否则按钮、请求或自动操作可能执行两次。
+                </div>
+            </section>
+
+            <section
+                class="manager-section manager-install-section"
+                id="scriptcat"
+                aria-labelledby="scriptcat-title"
+            >
+                <div class="manager-section-heading">
+                    <span>02</span>
+                    <div>
+                        <p>SCRIPTCAT</p>
+                        <h2 id="scriptcat-title">
+                            ScriptCat 脚本猫安装教程
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="manager-product-head scriptcat-theme">
+                    <div class="manager-product-mark">SC</div>
+                    <div>
+                        <span class="manager-recommendation">
+                            ScriptCat 来源脚本的推荐启动器
+                        </span>
+                        <h3>脚本猫</h3>
+                        <p>
+                            适合普通用户脚本，也支持后台脚本、
+                            定时任务和更丰富的扩展 API。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="manager-store-panel">
+                    <div>
+                        <strong>第一步：从官方扩展商店安装</strong>
+                        <p>请根据正在使用的浏览器选择对应按钮。</p>
+                    </div>
+                    <div class="manager-store-links">
+                        <a
+                            class="manager-store-link"
+                            href="https://chromewebstore.google.com/detail/scriptcat/ndcooeababalnlpkfedmmbbbgkljhpjf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Chrome 商店 ↗
+                        </a>
+                        <a
+                            class="manager-store-link"
+                            href="https://microsoftedge.microsoft.com/addons/detail/scriptcat/liilgpjgabokdklappibcjfablkpcekh"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Edge 商店 ↗
+                        </a>
+                        <a
+                            class="manager-store-link"
+                            href="https://addons.mozilla.org/zh-CN/firefox/addon/scriptcat/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Firefox 商店 ↗
+                        </a>
+                    </div>
+                </div>
+
+                <ol class="manager-step-list">
+                    <li>
+                        <span>1</span>
+                        <div>
+                            <h3>添加扩展</h3>
+                            <p>
+                                在商店页面点击“添加至 Chrome”、
+                                “获取”或“添加到 Firefox”，
+                                阅读权限提示后确认安装。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>2</span>
+                        <div>
+                            <h3>开启运行用户脚本的权限</h3>
+                            <p>
+                                Chrome 输入 <code>chrome://extensions</code>，
+                                Edge 输入 <code>edge://extensions</code>。
+                                找到 ScriptCat，打开“详情”并启用
+                                <strong>允许用户脚本</strong>。
+                                如果没有这个开关，请在扩展管理页开启
+                                <strong>开发者模式</strong>。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>3</span>
+                        <div>
+                            <h3>重新加载并固定图标</h3>
+                            <p>
+                                关闭再开启脚本猫，或重启浏览器。
+                                点击地址栏右侧的扩展按钮，把脚本猫固定到工具栏。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>4</span>
+                        <div>
+                            <h3>安装脚本</h3>
+                            <p>
+                                回到本站脚本详情页，点击“安装原版脚本”。
+                                脚本猫会打开确认页；检查适用网站、
+                                权限和代码来源后点击安装。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>5</span>
+                        <div>
+                            <h3>确认脚本已生效</h3>
+                            <p>
+                                打开脚本对应的网站并刷新页面。
+                                点击脚本猫图标，可以查看当前页面正在运行的脚本。
+                            </p>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="manager-official-links">
+                    <a
+                        href="https://docs.scriptcat.org/docs/use/use"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        脚本猫官方快速开始 ↗
+                    </a>
+                    <a
+                        href="https://docs.scriptcat.org/docs/use/open-dev/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        官方权限开启说明 ↗
+                    </a>
+                    <a
+                        href="https://github.com/scriptscat/scriptcat/releases"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        官方手动安装包 ↗
+                    </a>
+                </div>
+            </section>
+
+            <section
+                class="manager-section manager-install-section"
+                id="tampermonkey"
+                aria-labelledby="tampermonkey-title"
+            >
+                <div class="manager-section-heading">
+                    <span>03</span>
+                    <div>
+                        <p>TAMPERMONKEY</p>
+                        <h2 id="tampermonkey-title">
+                            Tampermonkey 篡改猴安装教程
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="manager-product-head tampermonkey-theme">
+                    <div class="manager-product-mark">TM</div>
+                    <div>
+                        <span class="manager-recommendation">
+                            Greasy Fork 来源脚本的推荐启动器
+                        </span>
+                        <h3>篡改猴</h3>
+                        <p>
+                            主流用户脚本管理器，可安装、更新、
+                            启停和备份 Greasy Fork 等网站提供的用户脚本。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="manager-store-panel">
+                    <div>
+                        <strong>第一步：从官方扩展商店安装</strong>
+                        <p>优先使用正式版，不建议从陌生网盘下载扩展。</p>
+                    </div>
+                    <div class="manager-store-links">
+                        <a
+                            class="manager-store-link"
+                            href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Chrome 商店 ↗
+                        </a>
+                        <a
+                            class="manager-store-link"
+                            href="https://microsoftedge.microsoft.com/addons/detail/iikmkjmpaadaobahmlepeloendndfphd"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Edge 商店 ↗
+                        </a>
+                        <a
+                            class="manager-store-link"
+                            href="https://addons.mozilla.org/firefox/addon/tampermonkey/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Firefox 商店 ↗
+                        </a>
+                    </div>
+                </div>
+
+                <ol class="manager-step-list">
+                    <li>
+                        <span>1</span>
+                        <div>
+                            <h3>添加篡改猴</h3>
+                            <p>
+                                打开对应扩展商店，确认扩展名称为
+                                Tampermonkey，开发者网站指向
+                                <code>tampermonkey.net</code>，然后添加扩展。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>2</span>
+                        <div>
+                            <h3>允许执行用户脚本</h3>
+                            <p>
+                                Tampermonkey 5.3+ 在 Chromium 浏览器中需要额外权限。
+                                Chrome/Edge 138+ 可在扩展“详情”中开启
+                                <strong>允许用户脚本</strong>；
+                                没有该选项时，在扩展管理页开启
+                                <strong>开发者模式</strong>。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>3</span>
+                        <div>
+                            <h3>固定并检查扩展状态</h3>
+                            <p>
+                                把篡改猴固定到工具栏。
+                                点击图标后能看到“管理面板”，
+                                说明扩展已经正常启用。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>4</span>
+                        <div>
+                            <h3>从本站安装原版脚本</h3>
+                            <p>
+                                进入脚本详情页，点击“安装原版脚本”。
+                                在篡改猴确认页检查脚本名称、
+                                匹配网站和申请权限，再点击安装。
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <span>5</span>
+                        <div>
+                            <h3>刷新目标网站</h3>
+                            <p>
+                                脚本只会在作者声明的网页上运行。
+                                打开目标网站后刷新；篡改猴图标上的数字
+                                通常表示当前页面运行的脚本数量。
+                            </p>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="manager-official-links">
+                    <a
+                        href="https://www.tampermonkey.net/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        篡改猴官方网站 ↗
+                    </a>
+                    <a
+                        href="https://www.tampermonkey.net/faq.php?locale=en&q=Q209"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        官方用户脚本权限说明 ↗
+                    </a>
+                    <a
+                        href="https://greasyfork.org/zh-CN/help/installing-user-scripts"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Greasy Fork 安装说明 ↗
+                    </a>
+                </div>
+            </section>
+
+            <section
+                class="manager-section"
+                aria-labelledby="troubleshooting-title"
+            >
+                <div class="manager-section-heading">
+                    <span>04</span>
+                    <div>
+                        <p>TROUBLESHOOTING</p>
+                        <h2 id="troubleshooting-title">
+                            安装后没有反应怎么办？
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="manager-faq-grid">
+                    <article>
+                        <h3>点击安装却只下载文件</h3>
+                        <p>
+                            先确认启动器已启用，并完成“允许用户脚本”设置。
+                            然后重新打开脚本详情页再点击安装，
+                            不要双击运行下载的 JavaScript 文件。
+                        </p>
+                    </article>
+                    <article>
+                        <h3>显示已安装但网页没变化</h3>
+                        <p>
+                            检查脚本是否开启、当前网址是否在适用范围内，
+                            再刷新页面。广告拦截器或同类脚本也可能产生冲突。
+                        </p>
+                    </article>
+                    <article>
+                        <h3>启动器图标没有运行数量</h3>
+                        <p>
+                            可能是当前页面不属于脚本的匹配网站，
+                            也可能没有开启用户脚本权限。
+                            浏览器内部页面通常不允许脚本运行。
+                        </p>
+                    </article>
+                    <article>
+                        <h3>脚本猫和篡改猴选哪个？</h3>
+                        <p>
+                            先按本站详情页的“推荐启动器”选择。
+                            若作者明确要求某个启动器，
+                            作者说明优先于本站默认推荐。
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="manager-security-note">
+                <div>
+                    <span>安全提醒</span>
+                    <h2>启动器可信，不代表每个脚本都可信</h2>
+                    <p>
+                        安装前应核对来源、最近更新时间、适用网站和权限。
+                        不安装来源不明、要求关闭浏览器安全功能，
+                        或索要账号密码的脚本。
+                    </p>
+                </div>
+                <a class="button button-primary" href="/scripts">
+                    返回脚本库
+                </a>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>ScriptHub Campus · 让重复劳动少一点</p>
+    </footer>
+</body>
+</html>

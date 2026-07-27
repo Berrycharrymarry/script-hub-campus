@@ -3292,3 +3292,533 @@ pre code {
         flex-wrap: wrap;
     }
 }
+
+/* =========================================================
+   用户脚本启动器安装指南
+   ========================================================= */
+
+.manager-guide-page {
+    background:
+        radial-gradient(
+            circle at 12% 8%,
+            rgba(37, 99, 235, 0.08),
+            transparent 24rem
+        ),
+        var(--bg);
+}
+
+.manager-guide-shell {
+    width: min(1080px, calc(100% - 40px));
+    margin: 0 auto;
+}
+
+.manager-hero {
+    overflow: hidden;
+    padding: 76px 0 68px;
+    border-bottom: 1px solid var(--border);
+    background:
+        radial-gradient(
+            circle at 88% 20%,
+            rgba(124, 58, 237, 0.15),
+            transparent 26rem
+        ),
+        linear-gradient(145deg, #ffffff, #f2f6ff);
+}
+
+.manager-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+    align-items: center;
+    gap: 52px;
+}
+
+.manager-kicker,
+.manager-section-heading p {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.manager-hero h1 {
+    max-width: 650px;
+    margin: 10px 0 18px;
+    color: #0f172a;
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+}
+
+.manager-hero-copy {
+    max-width: 680px;
+    color: #475569;
+    font-size: 18px;
+    line-height: 1.85;
+}
+
+.manager-hero-copy strong {
+    color: #1e293b;
+}
+
+.manager-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.manager-answer-card {
+    position: relative;
+    overflow: hidden;
+    padding: 30px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 24px 70px rgba(30, 64, 175, 0.13);
+}
+
+.manager-answer-card::after {
+    position: absolute;
+    top: -42px;
+    right: -42px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.16),
+        rgba(124, 58, 237, 0.08)
+    );
+    content: "";
+}
+
+.manager-answer-label,
+.manager-recommendation {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.manager-answer-card h2 {
+    position: relative;
+    margin: 15px 0 12px;
+    font-size: 24px;
+    line-height: 1.35;
+}
+
+.manager-answer-card p {
+    position: relative;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.manager-answer-card code,
+.manager-section code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: #334155;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 0.9em;
+}
+
+.manager-guide-content {
+    padding: 68px 0 84px;
+}
+
+.manager-section {
+    margin-bottom: 74px;
+    scroll-margin-top: calc(var(--nav-height) + 24px);
+}
+
+.manager-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.manager-section-heading > span {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    place-items: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.manager-section-heading h2 {
+    margin-top: 3px;
+    color: #0f172a;
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.manager-compat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.manager-compat-card {
+    padding: 25px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.manager-compat-card.is-compatible {
+    border-top: 4px solid #16a34a;
+}
+
+.manager-compat-card.is-scriptcat {
+    border-top: 4px solid #2563eb;
+}
+
+.manager-compat-card.is-tampermonkey {
+    border-top: 4px solid #dc2626;
+}
+
+.manager-compat-status {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+.manager-compat-card h3 {
+    margin-bottom: 9px;
+    font-size: 18px;
+}
+
+.manager-compat-card p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.manager-warning {
+    margin-top: 18px;
+    padding: 17px 20px;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 14px;
+}
+
+.manager-install-section {
+    padding: 34px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+}
+
+.manager-product-head {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding: 24px;
+    border-radius: 18px;
+}
+
+.scriptcat-theme {
+    background: linear-gradient(135deg, #eff6ff, #eef2ff);
+}
+
+.tampermonkey-theme {
+    background: linear-gradient(135deg, #fff7ed, #fef2f2);
+}
+
+.manager-product-mark {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    flex: none;
+    place-items: center;
+    border-radius: 18px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.scriptcat-theme .manager-product-mark {
+    background: linear-gradient(145deg, #2563eb, #4f46e5);
+}
+
+.tampermonkey-theme .manager-product-mark {
+    background: linear-gradient(145deg, #dc2626, #111827);
+}
+
+.manager-product-head h3 {
+    margin: 7px 0 3px;
+    font-size: 24px;
+}
+
+.manager-product-head p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.manager-store-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    margin-bottom: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.manager-store-panel p {
+    margin-top: 3px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.manager-store-links,
+.manager-official-links,
+.curated-install-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.manager-store-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.manager-store-link:hover {
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.manager-step-list {
+    list-style: none;
+}
+
+.manager-step-list li {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 16px;
+    padding: 22px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.manager-step-list li > span {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.manager-step-list h3 {
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.manager-step-list p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.manager-official-links {
+    padding-top: 20px;
+}
+
+.manager-official-links a {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.manager-official-links a:hover,
+.curated-install-links a:hover {
+    text-decoration: underline;
+}
+
+.manager-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.manager-faq-grid article {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #ffffff;
+}
+
+.manager-faq-grid h3 {
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.manager-faq-grid p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.manager-security-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 32px;
+    border-radius: 22px;
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.manager-security-note span {
+    color: #93c5fd;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.manager-security-note h2 {
+    margin: 7px 0;
+    font-size: 24px;
+}
+
+.manager-security-note p {
+    max-width: 700px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.manager-security-note .button {
+    flex: none;
+}
+
+.curated-install-links {
+    align-items: center;
+}
+
+.curated-install-links a + a {
+    color: #64748b;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .manager-hero-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manager-compat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manager-store-panel {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 680px) {
+    .manager-guide-shell {
+        width: min(100% - 28px, 1080px);
+    }
+
+    .manager-hero {
+        padding: 50px 0 44px;
+    }
+
+    .manager-hero-copy {
+        font-size: 16px;
+    }
+
+    .manager-install-section {
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+    .manager-product-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .manager-faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manager-security-note {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 24px;
+    }
+
+    .manager-security-note .button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .manager-hero-actions {
+        flex-direction: column;
+    }
+
+    .manager-section-heading {
+        align-items: flex-start;
+    }
+
+    .manager-section-heading > span {
+        width: 44px;
+        height: 44px;
+    }
+
+    .manager-answer-card,
+    .manager-compat-card {
+        padding: 21px;
+    }
+
+    .manager-store-links,
+    .manager-store-link {
+        width: 100%;
+    }
+
+    .manager-store-link {
+        justify-content: center;
+    }
+}

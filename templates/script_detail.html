@@ -43,6 +43,10 @@
                 脚本库
             </a>
 
+            <a href="/script-managers">
+                启动器指南
+            </a>
+
             <a href="/upload">
                 上传脚本
             </a>
@@ -472,26 +476,58 @@
                     </div>
 
                     {% if script.is_curated %}
+                        {% set recommended_manager =
+                            "ScriptCat"
+                            if script.source_name == "ScriptCat"
+                            else "Tampermonkey"
+                        %}
+
+                        {% set manager_anchor =
+                            "scriptcat"
+                            if recommended_manager == "ScriptCat"
+                            else "tampermonkey"
+                        %}
+
                         <div class="curated-install-guide">
                             <div class="curated-install-icon">🧩</div>
 
                             <div>
-                                <h3>需要先安装用户脚本管理器</h3>
+                                <span class="manager-recommendation">
+                                    推荐启动器
+                                </span>
+
+                                <h3>{{ recommended_manager }}</h3>
 
                                 <p>
-                                    在浏览器中安装 Tampermonkey、
-                                    Violentmonkey 或 ScriptCat，
-                                    再点击“安装原版脚本”。
-                                    安装页面会显示脚本申请的权限和完整代码。
+                                    {% if recommended_manager == "ScriptCat" %}
+                                        这是 ScriptCat 来源脚本，
+                                        建议优先使用脚本猫。
+                                        普通用户脚本可能也兼容篡改猴；
+                                        后台、定时或专属 API 脚本则需要脚本猫。
+                                    {% else %}
+                                        这是 {{ script.source_name }} 来源脚本，
+                                        建议优先使用篡改猴。
+                                        如果作者明确要求其他启动器，
+                                        请以作者说明为准。
+                                    {% endif %}
                                 </p>
 
-                                <a
-                                    href="{{ script.source_url }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    查看 {{ script.source_name }} 原始页面 ↗
-                                </a>
+                                <div class="curated-install-links">
+                                    <a
+                                        href="/script-managers#{{ manager_anchor }}"
+                                    >
+                                        查看 {{ recommended_manager }}
+                                        详细安装教程 →
+                                    </a>
+
+                                    <a
+                                        href="{{ script.source_url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        查看 {{ script.source_name }} 原始页面 ↗
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     {% else %}
@@ -543,6 +579,29 @@
                                 }}
                             </dd>
                         </div>
+
+                        {% if script.is_curated %}
+                            <div>
+                                <dt>推荐启动器</dt>
+
+                                <dd>
+                                    <a
+                                        href="/script-managers#{{
+                                            'scriptcat'
+                                            if script.source_name == 'ScriptCat'
+                                            else 'tampermonkey'
+                                        }}"
+                                    >
+                                        {{
+                                            "ScriptCat"
+                                            if script.source_name == "ScriptCat"
+                                            else "Tampermonkey"
+                                        }}
+                                        ↗
+                                    </a>
+                                </dd>
+                            </div>
+                        {% endif %}
 
                         <div>
                             <dt>

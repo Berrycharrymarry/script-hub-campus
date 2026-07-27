@@ -12,6 +12,7 @@ ScriptHub Campus 是一个面向校园场景的 Flask 脚本分享网站，支�
 - 根据语言下载 `.py`、`.ps1`、`.js`、`.sh` 等脚本文件
 - Userscript.Zone、ScriptCat 与 Greasy Fork 精选目录：展示发现来源、原作者、许可证、原版版本与更新时间
 - 第三方精选脚本通过 Greasy Fork 或 ScriptCat 官方安装地址获取，避免分发过期镜像
+- ScriptCat 与 Tampermonkey 安装指南：包含官方商店、用户脚本权限、兼容性判断和故障排查
 - DeepSeek AI 问答助手
 - 桌宠工坊：使用图片或动画生成 `.petpack` 资源包
 - Neon Rail Runner（Metro Rush 3D）Unity WebGL 浏览器游戏
