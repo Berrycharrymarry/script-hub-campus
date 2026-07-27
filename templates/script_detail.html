@@ -150,7 +150,11 @@
 
                     {% if script.is_curated %}
                         <span class="curated-badge">
-                            Greasy Fork 精选
+                            {{
+                                script.discovery_source
+                                or script.source_name
+                                or "第三方"
+                            }} 精选
                         </span>
                     {% endif %}
                 </div>
@@ -486,7 +490,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    查看 Greasy Fork 原始页面 ↗
+                                    查看 {{ script.source_name }} 原始页面 ↗
                                 </a>
                             </div>
                         </div>
@@ -558,8 +562,31 @@
                         </div>
 
                         {% if script.is_curated %}
+                            {% if
+                                script.discovery_source
+                                and script.discovery_url
+                                and (
+                                    script.discovery_source
+                                    != script.source_name
+                                )
+                            %}
+                                <div>
+                                    <dt>发现来源</dt>
+
+                                    <dd>
+                                        <a
+                                            href="{{ script.discovery_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {{ script.discovery_source }} ↗
+                                        </a>
+                                    </dd>
+                                </div>
+                            {% endif %}
+
                             <div>
-                                <dt>来源</dt>
+                                <dt>原版来源</dt>
 
                                 <dd>
                                     <a

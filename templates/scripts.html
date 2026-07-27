@@ -135,7 +135,11 @@
                         <div class="card-badge-row">
                             {% if script.is_curated %}
                                 <span class="curated-badge">
-                                    ✓ Greasy Fork 精选
+                                    ✓ {{
+                                        script.discovery_source
+                                        or script.source_name
+                                        or "第三方"
+                                    }} 精选
                                 </span>
                             {% endif %}
 

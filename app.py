@@ -5,6 +5,7 @@ from functools import wraps
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from urllib.parse import urlsplit
 
 from flask import (
     Flask,
@@ -157,14 +158,38 @@ def parse_script_tags(value):
     return normalize_script_tags(parsed)
 
 
-def is_trusted_greasyfork_install_url(url):
-    """只允许精选条目跳转到 Greasy Fork 官方脚本源。"""
+def is_trusted_curated_install_url(url):
+    """只允许精选条目跳转到已审核来源站的用户脚本文件。"""
+    if not isinstance(url, str):
+        return False
+
+    parsed_url = urlsplit(url)
+
+    if (
+        parsed_url.scheme != "https"
+        or parsed_url.username is not None
+        or parsed_url.password is not None
+        or parsed_url.query
+        or parsed_url.fragment
+    ):
+        return False
+
+    trusted_paths = {
+        "update.greasyfork.org": "/scripts/",
+        "scriptcat.org": "/scripts/code/"
+    }
+    required_prefix = trusted_paths.get(
+        parsed_url.hostname
+    )
+
     return (
-        isinstance(url, str)
-        and url.startswith(
-            "https://update.greasyfork.org/scripts/"
+        required_prefix is not None
+        and parsed_url.path.startswith(
+            required_prefix
         )
-        and url.endswith(".user.js")
+        and parsed_url.path.endswith(
+            ".user.js"
+        )
     )
 
 
@@ -1125,7 +1150,7 @@ def download_script(script_id):
     finally:
         conn.close()
 
-    if is_trusted_greasyfork_install_url(
+    if is_trusted_curated_install_url(
         script["install_url"]
     ):
         return redirect(
