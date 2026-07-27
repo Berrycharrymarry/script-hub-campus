@@ -1,5 +1,6 @@
 .env
 .venv/
+.test-deps/
 .vscode/
 __pycache__/
 *.pyc

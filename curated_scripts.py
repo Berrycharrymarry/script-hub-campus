@@ -140,7 +140,7 @@ def seed_curated_scripts(conn):
 
     for script in CURATED_SCRIPTS:
         conn.execute("""
-            INSERT OR IGNORE INTO scripts (
+            INSERT INTO scripts (
                 user_id,
                 author_name,
                 title,
@@ -170,6 +170,7 @@ def seed_curated_scripts(conn):
                 'approved', ?, 0, 0, ?, ?, ?, ?,
                 'Greasy Fork', ?, ?, ?, ?, ?, 1
             )
+            ON CONFLICT DO NOTHING
         """, (
             script["author_name"],
             script["title"],

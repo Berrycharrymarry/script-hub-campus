@@ -1,3 +1,4 @@
+import os
 import shutil
 import sqlite3
 from datetime import datetime
@@ -10,6 +11,36 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "scripts.db"
 
 
+def uses_postgresql():
+    """Return whether the current environment is configured for PostgreSQL."""
+    return bool(os.getenv("DATABASE_URL", "").strip())
+
+
+class PostgresConnection:
+    """Expose the small sqlite-style connection API used by the application."""
+
+    is_postgresql = True
+
+    def __init__(self, connection):
+        self.connection = connection
+
+    def execute(self, query, parameters=()):
+        postgres_query = query.replace("?", "%s")
+        return self.connection.execute(
+            postgres_query,
+            parameters
+        )
+
+    def commit(self):
+        self.connection.commit()
+
+    def rollback(self):
+        self.connection.rollback()
+
+    def close(self):
+        self.connection.close()
+
+
 def now_text():
     """返回统一格式的本地时间字符串。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -17,6 +48,9 @@ def now_text():
 
 def backup_database():
     """在数据库结构升级前创建一次备份。"""
+    if uses_postgresql():
+        return None
+
     if not DB_PATH.exists():
         return None
 
@@ -31,7 +65,25 @@ def backup_database():
 
 
 def get_db_connection():
-    """创建并返回一个 SQLite 数据库连接。"""
+    """Create a PostgreSQL connection in production, otherwise SQLite."""
+    database_url = os.getenv(
+        "DATABASE_URL",
+        ""
+    ).strip()
+
+    if database_url:
+        import psycopg
+        from psycopg.rows import dict_row
+
+        connection = psycopg.connect(
+            database_url,
+            row_factory=dict_row,
+            connect_timeout=15,
+            prepare_threshold=None
+        )
+
+        return PostgresConnection(connection)
+
     conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -63,7 +115,7 @@ def ensure_configured_admin(username, password_hash):
         existing_user = conn.execute("""
             SELECT id
             FROM users
-            WHERE username = ? COLLATE NOCASE
+            WHERE LOWER(username) = LOWER(?)
         """, (normalized_username,)).fetchone()
 
         if existing_user is None:
@@ -112,6 +164,16 @@ def ensure_configured_admin(username, password_hash):
 
 def get_table_columns(conn, table_name):
     """返回指定数据表当前拥有的全部字段名。"""
+    if getattr(conn, "is_postgresql", False):
+        rows = conn.execute("""
+            SELECT column_name AS name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = ?
+        """, (table_name,)).fetchall()
+
+        return {row["name"] for row in rows}
+
     rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
     return {row["name"] for row in rows}
 
@@ -125,8 +187,17 @@ def add_missing_script_columns(conn):
     """
     existing_columns = get_table_columns(conn, "scripts")
 
+    user_id_type = (
+        "BIGINT"
+        if getattr(conn, "is_postgresql", False)
+        else "INTEGER"
+    )
+
     new_columns = {
-        "user_id": "INTEGER REFERENCES users(id) ON DELETE SET NULL",
+        "user_id": (
+            f"{user_id_type} "
+            "REFERENCES users(id) ON DELETE SET NULL"
+        ),
         "author_name": "TEXT NOT NULL DEFAULT '匿名用户'",
         "review_note": "TEXT",
         "line_count": "INTEGER NOT NULL DEFAULT 0",
@@ -199,12 +270,27 @@ def init_db():
     已存在的表不会重复创建，旧 scripts 表会自动补字段。
     """
     conn = get_db_connection()
+    is_postgresql = getattr(
+        conn,
+        "is_postgresql",
+        False
+    )
+    primary_key_type = (
+        "BIGSERIAL PRIMARY KEY"
+        if is_postgresql
+        else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    )
+    foreign_key_type = (
+        "BIGINT"
+        if is_postgresql
+        else "INTEGER"
+    )
 
     try:
         # 用户表：为后续注册、登录和管理员权限做准备
-        conn.execute("""
+        conn.execute(f"""
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {primary_key_type},
                 username TEXT NOT NULL UNIQUE,
                 email TEXT UNIQUE,
                 password_hash TEXT NOT NULL,
@@ -216,10 +302,10 @@ def init_db():
         """)
 
         # 脚本主表：保存脚本本身以及审核、统计、分析信息
-        conn.execute("""
+        conn.execute(f"""
             CREATE TABLE IF NOT EXISTS scripts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
+                id {primary_key_type},
+                user_id {foreign_key_type},
                 author_name TEXT NOT NULL DEFAULT '匿名用户',
                 title TEXT NOT NULL,
                 description TEXT,
@@ -254,11 +340,11 @@ def init_db():
         add_missing_script_columns(conn)
 
         # 点赞关系表：限制同一用户不能重复点赞同一个脚本
-        conn.execute("""
+        conn.execute(f"""
             CREATE TABLE IF NOT EXISTS script_likes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                script_id INTEGER NOT NULL,
-                user_id INTEGER NOT NULL,
+                id {primary_key_type},
+                script_id {foreign_key_type} NOT NULL,
+                user_id {foreign_key_type} NOT NULL,
                 created_at TEXT NOT NULL,
                 UNIQUE (script_id, user_id),
                 FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE,
@@ -267,11 +353,11 @@ def init_db():
         """)
 
         # 收藏关系表
-        conn.execute("""
+        conn.execute(f"""
             CREATE TABLE IF NOT EXISTS script_favorites (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                script_id INTEGER NOT NULL,
-                user_id INTEGER NOT NULL,
+                id {primary_key_type},
+                script_id {foreign_key_type} NOT NULL,
+                user_id {foreign_key_type} NOT NULL,
                 created_at TEXT NOT NULL,
                 UNIQUE (script_id, user_id),
                 FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE,
@@ -280,11 +366,11 @@ def init_db():
         """)
 
         # 评论表：后续可直接实现脚本评论区
-        conn.execute("""
+        conn.execute(f"""
             CREATE TABLE IF NOT EXISTS comments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                script_id INTEGER NOT NULL,
-                user_id INTEGER NOT NULL,
+                id {primary_key_type},
+                script_id {foreign_key_type} NOT NULL,
+                user_id {foreign_key_type} NOT NULL,
                 content TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'visible',
                 created_at TEXT NOT NULL,

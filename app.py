@@ -267,6 +267,7 @@ def register():
                             updated_at
                         )
                         VALUES (?, ?, ?, ?, ?, ?, ?)
+                        RETURNING id
                     """, (
                         username,
                         None,
@@ -277,10 +278,10 @@ def register():
                         current_time
                     ))
 
-                    conn.commit()
-
                     # 获取刚刚创建的用户编号
-                    user_id = cursor.lastrowid
+                    user_id = cursor.fetchone()["id"]
+
+                    conn.commit()
 
             finally:
                 conn.close()

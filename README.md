@@ -31,6 +31,7 @@ Copy-Item .env.example .env
 ```env
 DEEPSEEK_API_KEY=你的_DeepSeek_API_Key
 FLASK_SECRET_KEY=请替换为随机长字符串
+DATABASE_URL=
 ```
 
 初始化并启动：
@@ -67,6 +68,7 @@ GitHub 用于托管源代码，GitHub Pages 不能直接运行 Flask 服务。�
 
 - Render 自动安装依赖并使用 Gunicorn 启动 Flask。
 - `FLASK_SECRET_KEY` 由 Render 自动生成。
+- `DATABASE_URL` 在 Render 中作为私密环境变量保存；配置后线上使用 PostgreSQL，本地留空时仍使用 SQLite。
 - `DEEPSEEK_API_KEY` 需要在创建服务时作为私密环境变量填写。
 - `ADMIN_USERNAME` 与 `ADMIN_PASSWORD_HASH` 必须成对配置；服务器启动时会自动创建或恢复该管理员账号，密码哈希不会提交到 GitHub。
-- 免费 Render Web Service 的文件系统是临时的，SQLite 用户和投稿数据会在服务休眠、重启或重新部署后重置；精选脚本会在启动时自动恢复。
+- PostgreSQL 中的用户、投稿、评论、点赞和收藏不会因 Render 休眠、重启或重新部署而丢失。

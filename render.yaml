@@ -11,6 +11,8 @@ services:
         value: production
       - key: FLASK_SECRET_KEY
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
       - key: ADMIN_USERNAME
         value: Berry
       - key: ADMIN_PASSWORD_HASH

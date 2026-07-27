@@ -7,13 +7,23 @@ def show_database_status():
     conn = get_db_connection()
 
     try:
-        tables = conn.execute("""
-            SELECT name
-            FROM sqlite_master
-            WHERE type = 'table'
-              AND name NOT LIKE 'sqlite_%'
-            ORDER BY name
-        """).fetchall()
+        if getattr(conn, "is_postgresql", False):
+            tables = conn.execute("""
+                SELECT table_name AS name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_type = 'BASE TABLE'
+                ORDER BY table_name
+            """).fetchall()
+
+        else:
+            tables = conn.execute("""
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+                  AND name NOT LIKE 'sqlite_%'
+                ORDER BY name
+            """).fetchall()
 
         print("数据库中的数据表：")
 
@@ -28,9 +38,21 @@ def show_database_status():
 
         print("\nscripts 表字段：")
 
-        columns = conn.execute(
-            "PRAGMA table_info(scripts)"
-        ).fetchall()
+        if getattr(conn, "is_postgresql", False):
+            columns = conn.execute("""
+                SELECT
+                    column_name AS name,
+                    data_type AS type
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'scripts'
+                ORDER BY ordinal_position
+            """).fetchall()
+
+        else:
+            columns = conn.execute(
+                "PRAGMA table_info(scripts)"
+            ).fetchall()
 
         for column in columns:
             print(
