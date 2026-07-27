@@ -14,6 +14,7 @@ ScriptHub Campus 是一个面向校园场景的 Flask 脚本分享网站，支�
 - 第三方精选脚本通过 Greasy Fork 官方安装地址获取，避免分发过期镜像
 - DeepSeek AI 问答助手
 - 桌宠工坊：使用图片或动画生成 `.petpack` 资源包
+- Neon Rail Runner（Metro Rush 3D）Unity WebGL 浏览器游戏
 
 ## 本地运行
 

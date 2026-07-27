@@ -37,6 +37,10 @@
                 桌宠工坊
             </a>
 
+            <a href="/games/neon-rail-runner">
+                游戏厅
+            </a>
+
             {% if session.get("user_id") %}
                 <a href="/my/scripts">
                     我的投稿
@@ -81,8 +85,31 @@
                 <a class="button button-primary" href="/upload">📤 上传一个脚本</a>
                 <a class="button button-secondary" href="/scripts">📂 浏览脚本库</a>
                 <a class="button button-outline" href="/pet-generator">✨ 制作桌宠</a>
+                <a class="button button-game" href="/games/neon-rail-runner">🎮 玩 3D 跑酷</a>
             </div>
         </div>
+
+        <a
+            class="game-showcase"
+            href="/games/neon-rail-runner"
+            aria-label="进入 Neon Rail Runner 3D 跑酷游戏"
+        >
+            <div class="game-showcase-copy">
+                <span class="game-kicker">BERRY STUDIO · WEBGL</span>
+                <h2>Neon Rail Runner</h2>
+                <p>
+                    Metro Rush 3D 已经加入网站。穿梭霓虹轨道，
+                    躲避列车与障碍，收集金币和强化道具。
+                </p>
+                <span class="game-showcase-cta">立即开始游戏 →</span>
+            </div>
+            <div class="game-showcase-art" aria-hidden="true">
+                <span class="rail rail-one"></span>
+                <span class="rail rail-two"></span>
+                <span class="runner-orb"></span>
+                <span class="game-score">3D</span>
+            </div>
+        </a>
 
         <div class="features">
             <a

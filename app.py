@@ -13,6 +13,7 @@ from flask import (
     request,
     redirect,
     send_file,
+    send_from_directory,
     url_for,
     session
 )
@@ -43,6 +44,13 @@ from pet_generator.build_petpack import (
 load_dotenv()
 
 app = Flask(__name__)
+
+NEON_RAIL_RUNNER_BUILD = (
+    Path(app.root_path)
+    / "static"
+    / "games"
+    / "neon-rail-runner"
+)
 
 # Flask 使用 SECRET_KEY 对 Session 登录信息进行签名
 app.config["SECRET_KEY"] = os.getenv(
@@ -504,6 +512,60 @@ def health():
     return {
         "status": "ok"
     }
+
+
+# =========================
+# Neon Rail Runner WebGL 游戏
+# =========================
+@app.route("/games/neon-rail-runner")
+def neon_rail_runner():
+    return render_template(
+        "neon_rail_runner.html"
+    )
+
+
+@app.route(
+    "/games/neon-rail-runner/play/",
+    defaults={"filename": "index.html"}
+)
+@app.route(
+    "/games/neon-rail-runner/play/<path:filename>"
+)
+def neon_rail_runner_file(filename):
+    """提供 Unity WebGL 文件，并为压缩资源设置正确响应头。"""
+    response = send_from_directory(
+        NEON_RAIL_RUNNER_BUILD,
+        filename
+    )
+
+    if filename.endswith(".gz"):
+        uncompressed_name = filename[:-3]
+        response.headers["Content-Encoding"] = "gzip"
+        response.headers["Vary"] = "Accept-Encoding"
+
+        if uncompressed_name.endswith(".wasm"):
+            response.headers["Content-Type"] = (
+                "application/wasm"
+            )
+        elif uncompressed_name.endswith(".js"):
+            response.headers["Content-Type"] = (
+                "application/javascript; charset=utf-8"
+            )
+        elif uncompressed_name.endswith(".data"):
+            response.headers["Content-Type"] = (
+                "application/octet-stream"
+            )
+
+    if filename == "index.html":
+        response.headers["Cache-Control"] = (
+            "no-cache"
+        )
+    else:
+        response.headers["Cache-Control"] = (
+            "public, max-age=604800"
+        )
+
+    return response
 
 
 # =========================

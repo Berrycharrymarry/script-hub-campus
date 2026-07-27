@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="在线游玩 Berry Studio 制作的 Neon Rail Runner（Metro Rush 3D）。"
+    >
+    <title>Neon Rail Runner | ScriptHub Campus</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="game-page">
+    <nav class="navbar game-navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">🎮</span>
+            <a href="/">ScriptHub Campus</a>
+        </div>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/scripts">脚本库</a>
+            <a href="/pet-generator">桌宠工坊</a>
+            <a href="/games/neon-rail-runner" class="active">游戏厅</a>
+            {% if session.get("user_id") %}
+                <a href="/my/scripts">我的投稿</a>
+                <form
+                    action="/logout"
+                    method="post"
+                    class="nav-logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="nav-logout-button"
+                    >
+                        退出登录
+                    </button>
+                </form>
+            {% else %}
+                <a href="/login">登录</a>
+            {% endif %}
+        </div>
+        <button
+            class="nav-toggle"
+            type="button"
+            aria-label="打开导航"
+            onclick="document.querySelector('.nav-links').classList.toggle('open')"
+        >
+            ☰
+        </button>
+    </nav>
+
+    <main class="game-shell">
+        <header class="game-hero">
+            <div>
+                <p class="game-kicker">BERRY STUDIO · UNITY WEBGL</p>
+                <h1>Neon Rail Runner</h1>
+                <p class="game-subtitle">
+                    Metro Rush 3D 霓虹轨道跑酷，现在无需下载即可在浏览器中游玩。
+                </p>
+            </div>
+            <div class="game-status">
+                <span class="status-dot"></span>
+                浏览器版已上线
+            </div>
+        </header>
+
+        <section class="game-stage" aria-label="Neon Rail Runner 游戏区域">
+            <div class="game-loading-note" id="game-loading-note">
+                首次加载约 12 MB，请稍候…
+            </div>
+            <iframe
+                id="neon-game-frame"
+                class="game-frame"
+                src="/games/neon-rail-runner/play/"
+                title="Neon Rail Runner"
+                allow="fullscreen; autoplay"
+                allowfullscreen
+            ></iframe>
+        </section>
+
+        <div class="game-toolbar">
+            <p>点击游戏画面后，键盘操作才会生效。</p>
+            <button
+                class="button button-game"
+                id="fullscreen-game"
+                type="button"
+            >
+                ⛶ 全屏游玩
+            </button>
+        </div>
+
+        <section class="game-info-grid">
+            <article class="game-info-card">
+                <span class="control-key">A / ←</span>
+                <span class="control-key">D / →</span>
+                <h2>切换轨道</h2>
+                <p>向左或向右移动，躲开迎面而来的障碍。</p>
+            </article>
+            <article class="game-info-card">
+                <span class="control-key">W / ↑</span>
+                <span class="control-key">空格</span>
+                <h2>跳跃</h2>
+                <p>越过低矮障碍，抓住空中的金币和道具。</p>
+            </article>
+            <article class="game-info-card">
+                <span class="control-key">S / ↓</span>
+                <h2>翻滚</h2>
+                <p>从障碍下方快速滑过，继续保持速度。</p>
+            </article>
+            <article class="game-info-card">
+                <span class="control-key">Esc</span>
+                <span class="control-key">R</span>
+                <h2>暂停与重开</h2>
+                <p>Esc 暂停或继续，R 随时重新开始一局。</p>
+            </article>
+        </section>
+
+        <aside class="game-tip">
+            <strong>提示：</strong>
+            推荐使用电脑端 Chrome、Edge 或 Firefox。手机浏览器可以打开，
+            但当前版本主要使用键盘操作。
+        </aside>
+    </main>
+
+    <footer class="footer game-footer">
+        <p>Neon Rail Runner · Created by Berry Studio</p>
+    </footer>
+
+    <script>
+        const gameFrame = document.querySelector("#neon-game-frame");
+        const loadingNote = document.querySelector("#game-loading-note");
+        const fullscreenButton = document.querySelector("#fullscreen-game");
+
+        gameFrame.addEventListener("load", () => {
+            loadingNote.classList.add("is-hidden");
+        });
+
+        fullscreenButton.addEventListener("click", async () => {
+            try {
+                if (gameFrame.requestFullscreen) {
+                    await gameFrame.requestFullscreen();
+                }
+            } catch (error) {
+                gameFrame.focus();
+            }
+        });
+    </script>
+</body>
+</html>
