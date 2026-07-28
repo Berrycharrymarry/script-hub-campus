@@ -65,29 +65,70 @@
             </div>
         </header>
 
-        <section class="game-stage" aria-label="Neon Rail Runner 游戏区域">
-            <div class="game-loading-note" id="game-loading-note">
-                首次加载约 12 MB，请稍候…
-            </div>
-            <iframe
-                id="neon-game-frame"
-                class="game-frame"
-                src="/games/neon-rail-runner/play/"
-                title="Neon Rail Runner"
-                allow="fullscreen; autoplay"
-                allowfullscreen
-            ></iframe>
-        </section>
+        <div class="game-play-grid">
+            <div class="game-player-column">
+                <section class="game-stage" aria-label="Neon Rail Runner 游戏区域">
+                    <div class="game-loading-note" id="game-loading-note">
+                        首次加载约 12 MB，请稍候…
+                    </div>
+                    <iframe
+                        id="neon-game-frame"
+                        class="game-frame"
+                        src="/games/neon-rail-runner/play/"
+                        title="Neon Rail Runner"
+                        allow="fullscreen; autoplay"
+                        allowfullscreen
+                    ></iframe>
+                </section>
 
-        <div class="game-toolbar">
-            <p>点击游戏画面后，键盘操作才会生效。</p>
-            <button
-                class="button button-game"
-                id="fullscreen-game"
-                type="button"
-            >
-                ⛶ 全屏游玩
-            </button>
+                <div class="game-toolbar">
+                    <p>点击游戏画面后，键盘操作才会生效。</p>
+                    <button
+                        class="button button-game"
+                        id="fullscreen-game"
+                        type="button"
+                    >
+                        ⛶ 全屏游玩
+                    </button>
+                </div>
+            </div>
+
+            <aside class="leaderboard-card" aria-labelledby="leaderboard-title">
+                <div class="leaderboard-heading">
+                    <div>
+                        <p class="game-kicker">BEST RUNS</p>
+                        <h2 id="leaderboard-title">最高分排行榜</h2>
+                    </div>
+                    <span class="leaderboard-live">TOP 20</span>
+                </div>
+
+                <ol
+                    class="leaderboard-list"
+                    id="leaderboard-list"
+                    aria-live="polite"
+                >
+                    <li class="leaderboard-empty">正在读取排行榜…</li>
+                </ol>
+
+                <div class="personal-score" id="personal-score">
+                    {% if session.get("user_id") %}
+                        <span>我的纪录</span>
+                        <strong>完成一局后自动保存</strong>
+                    {% else %}
+                        <span>想留下你的纪录？</span>
+                        <a href="/login">登录后参与排名 →</a>
+                    {% endif %}
+                </div>
+
+                <p class="score-submit-status" id="score-submit-status">
+                    {% if session.get("user_id") %}
+                        游戏结束时会自动提交本局分数。
+                    {% else %}
+                        未登录也可以游玩，但不会保存成绩。
+                    {% endif %}
+                </p>
+                <p class="leaderboard-note">客户端成绩，仅作娱乐排名。</p>
+            </aside>
         </div>
 
         <section class="game-info-grid">
@@ -131,6 +172,14 @@
         const gameFrame = document.querySelector("#neon-game-frame");
         const loadingNote = document.querySelector("#game-loading-note");
         const fullscreenButton = document.querySelector("#fullscreen-game");
+        const leaderboardList = document.querySelector("#leaderboard-list");
+        const personalScore = document.querySelector("#personal-score");
+        const scoreStatus = document.querySelector("#score-submit-status");
+        const isAuthenticated = {{ "true" if session.get("user_id") else "false" }};
+        const scoreSubmissionToken = {{ score_submission_token | tojson }};
+        const leaderboardUrl = "/api/games/neon-rail-runner/leaderboard";
+        const scoreSubmitUrl = "/api/games/neon-rail-runner/scores";
+        let isSubmittingScore = false;
 
         gameFrame.addEventListener("load", () => {
             loadingNote.classList.add("is-hidden");
@@ -145,6 +194,157 @@
                 gameFrame.focus();
             }
         });
+
+        function formatScore(score) {
+            return Number(score || 0).toLocaleString("zh-CN");
+        }
+
+        function renderLeaderboard(data) {
+            leaderboardList.replaceChildren();
+
+            if (!data.leaderboard || data.leaderboard.length === 0) {
+                const emptyItem = document.createElement("li");
+                emptyItem.className = "leaderboard-empty";
+                emptyItem.textContent = "还没有纪录，等你来拿第一名。";
+                leaderboardList.appendChild(emptyItem);
+            } else {
+                data.leaderboard.forEach((entry) => {
+                    const item = document.createElement("li");
+                    item.className = "leaderboard-row";
+
+                    if (
+                        data.current_user
+                        && entry.username === data.current_user.username
+                    ) {
+                        item.classList.add("is-current-user");
+                    }
+
+                    const rank = document.createElement("span");
+                    rank.className = "leaderboard-rank";
+                    rank.textContent = entry.rank <= 3
+                        ? ["🥇", "🥈", "🥉"][entry.rank - 1]
+                        : `#${entry.rank}`;
+
+                    const username = document.createElement("strong");
+                    username.className = "leaderboard-name";
+                    username.textContent = entry.username;
+
+                    const score = document.createElement("span");
+                    score.className = "leaderboard-score";
+                    score.textContent = formatScore(entry.best_score);
+
+                    item.append(rank, username, score);
+                    leaderboardList.appendChild(item);
+                });
+            }
+
+            if (isAuthenticated) {
+                personalScore.replaceChildren();
+
+                const label = document.createElement("span");
+                label.textContent = "我的纪录";
+                const value = document.createElement("strong");
+
+                if (data.current_user) {
+                    value.textContent = (
+                        `#${data.current_user.rank} · `
+                        + `${formatScore(data.current_user.best_score)} 分`
+                    );
+                } else {
+                    value.textContent = "完成一局后自动保存";
+                }
+
+                personalScore.append(label, value);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(leaderboardUrl, {
+                    headers: {"Accept": "application/json"}
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "排行榜读取失败");
+                }
+
+                renderLeaderboard(data);
+            } catch (error) {
+                leaderboardList.innerHTML = (
+                    '<li class="leaderboard-empty">'
+                    + "排行榜暂时无法读取，请稍后刷新。"
+                    + "</li>"
+                );
+            }
+        }
+
+        async function submitScore(score) {
+            if (!isAuthenticated) {
+                scoreStatus.textContent = "本局成绩未保存；登录后即可参与排名。";
+                return;
+            }
+
+            if (isSubmittingScore) {
+                return;
+            }
+
+            isSubmittingScore = true;
+            scoreStatus.textContent = `正在保存 ${formatScore(score)} 分…`;
+
+            try {
+                const response = await fetch(scoreSubmitUrl, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "X-Game-Token": scoreSubmissionToken
+                    },
+                    body: JSON.stringify({score})
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "成绩保存失败");
+                }
+
+                renderLeaderboard(data);
+                scoreStatus.textContent = data.is_new_best
+                    ? `新纪录！最高分 ${formatScore(data.best_score)}。`
+                    : (
+                        `本局 ${formatScore(score)} 分，`
+                        + `最高分仍是 ${formatScore(data.best_score)}。`
+                    );
+            } catch (error) {
+                scoreStatus.textContent = error.message || "成绩保存失败，请刷新后重试。";
+            } finally {
+                isSubmittingScore = false;
+            }
+        }
+
+        window.addEventListener("message", (event) => {
+            if (
+                event.origin !== window.location.origin
+                || event.source !== gameFrame.contentWindow
+                || !event.data
+                || event.data.type !== "neon-rail-score"
+            ) {
+                return;
+            }
+
+            const score = event.data.score;
+
+            if (
+                Number.isInteger(score)
+                && score >= 0
+                && score <= 100000000
+            ) {
+                submitScore(score);
+            }
+        });
+
+        loadLeaderboard();
     </script>
 </body>
 </html>

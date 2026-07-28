@@ -384,6 +384,20 @@ def init_db():
             )
         """)
 
+        # 游戏最高分：每个用户在每款游戏中只保存一条历史最佳纪录
+        conn.execute(f"""
+            CREATE TABLE IF NOT EXISTS game_scores (
+                id {primary_key_type},
+                game_key TEXT NOT NULL,
+                user_id {foreign_key_type} NOT NULL,
+                best_score INTEGER NOT NULL DEFAULT 0,
+                achieved_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE (game_key, user_id),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+
         # 索引可以加快常用查询
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_scripts_status_id
@@ -410,6 +424,11 @@ def init_db():
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_comments_script_id
             ON comments (script_id, id DESC)
+        """)
+
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_game_scores_ranking
+            ON game_scores (game_key, best_score DESC, achieved_at)
         """)
 
         seed_curated_scripts(conn)

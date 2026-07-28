@@ -1,5 +1,6 @@
 import json
 import os
+import secrets
 from collections import Counter
 from functools import wraps
 from io import BytesIO
@@ -52,6 +53,9 @@ NEON_RAIL_RUNNER_BUILD = (
     / "games"
     / "neon-rail-runner"
 )
+NEON_RAIL_RUNNER_KEY = "neon-rail-runner"
+NEON_RAIL_LEADERBOARD_LIMIT = 20
+NEON_RAIL_MAX_SCORE = 100_000_000
 
 DESKTOP_PET_PLAYER_VERSION = "1.1.0"
 
@@ -554,11 +558,244 @@ def script_managers():
 # =========================
 # Neon Rail Runner WebGL 游戏
 # =========================
+def get_neon_rail_leaderboard(conn, current_user_id=None):
+    """读取最高分排名，并在登录时附带当前用户的名次。"""
+    ranking_query = """
+        WITH ranked_scores AS (
+            SELECT
+                game_scores.user_id,
+                users.username,
+                game_scores.best_score,
+                game_scores.achieved_at,
+                DENSE_RANK() OVER (
+                    ORDER BY game_scores.best_score DESC
+                ) AS rank
+            FROM game_scores
+            INNER JOIN users
+                ON users.id = game_scores.user_id
+            WHERE game_scores.game_key = ?
+              AND users.is_active = 1
+        )
+    """
+
+    top_rows = conn.execute(
+        ranking_query
+        + """
+            SELECT *
+            FROM ranked_scores
+            ORDER BY rank ASC, achieved_at ASC, username ASC
+            LIMIT ?
+        """,
+        (
+            NEON_RAIL_RUNNER_KEY,
+            NEON_RAIL_LEADERBOARD_LIMIT
+        )
+    ).fetchall()
+
+    leaderboard = [
+        {
+            "rank": int(row["rank"]),
+            "username": row["username"],
+            "best_score": int(row["best_score"])
+        }
+        for row in top_rows
+    ]
+
+    current_user = None
+
+    if current_user_id is not None:
+        current_row = conn.execute(
+            ranking_query
+            + """
+                SELECT *
+                FROM ranked_scores
+                WHERE user_id = ?
+            """,
+            (
+                NEON_RAIL_RUNNER_KEY,
+                current_user_id
+            )
+        ).fetchone()
+
+        if current_row is not None:
+            current_user = {
+                "rank": int(current_row["rank"]),
+                "username": current_row["username"],
+                "best_score": int(current_row["best_score"])
+            }
+
+    return {
+        "leaderboard": leaderboard,
+        "current_user": current_user
+    }
+
+
 @app.route("/games/neon-rail-runner")
 def neon_rail_runner():
+    score_submission_token = ""
+
+    if session.get("user_id") is not None:
+        score_submission_token = session.get(
+            "neon_rail_score_token",
+            ""
+        )
+
+        if not score_submission_token:
+            score_submission_token = secrets.token_urlsafe(32)
+            session["neon_rail_score_token"] = score_submission_token
+
     return render_template(
-        "neon_rail_runner.html"
+        "neon_rail_runner.html",
+        score_submission_token=score_submission_token
     )
+
+
+@app.route("/api/games/neon-rail-runner/leaderboard")
+def neon_rail_runner_leaderboard():
+    conn = get_db_connection()
+
+    try:
+        ranking = get_neon_rail_leaderboard(
+            conn,
+            session.get("user_id")
+        )
+
+    finally:
+        conn.close()
+
+    return jsonify({
+        "success": True,
+        **ranking
+    })
+
+
+@app.route(
+    "/api/games/neon-rail-runner/scores",
+    methods=["POST"]
+)
+def submit_neon_rail_runner_score():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return jsonify({
+            "success": False,
+            "message": "请先登录，再参与排行榜。"
+        }), 401
+
+    expected_token = session.get(
+        "neon_rail_score_token",
+        ""
+    )
+    supplied_token = request.headers.get(
+        "X-Game-Token",
+        ""
+    )
+
+    if (
+        not expected_token
+        or not supplied_token
+        or not secrets.compare_digest(
+            expected_token,
+            supplied_token
+        )
+    ):
+        return jsonify({
+            "success": False,
+            "message": "成绩提交凭证已失效，请刷新游戏页面后重试。"
+        }), 403
+
+    payload = request.get_json(silent=True)
+    score = (
+        payload.get("score")
+        if isinstance(payload, dict)
+        else None
+    )
+
+    if (
+        isinstance(score, bool)
+        or not isinstance(score, int)
+        or score < 0
+        or score > NEON_RAIL_MAX_SCORE
+    ):
+        return jsonify({
+            "success": False,
+            "message": "成绩格式不正确。"
+        }), 400
+
+    current_time = now_text()
+    conn = get_db_connection()
+
+    try:
+        previous_row = conn.execute("""
+            SELECT best_score
+            FROM game_scores
+            WHERE game_key = ?
+              AND user_id = ?
+        """, (
+            NEON_RAIL_RUNNER_KEY,
+            user_id
+        )).fetchone()
+
+        previous_best = (
+            int(previous_row["best_score"])
+            if previous_row is not None
+            else None
+        )
+
+        conn.execute("""
+            INSERT INTO game_scores (
+                game_key,
+                user_id,
+                best_score,
+                achieved_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (game_key, user_id)
+            DO UPDATE SET
+                best_score = excluded.best_score,
+                achieved_at = excluded.achieved_at,
+                updated_at = excluded.updated_at
+            WHERE excluded.best_score > game_scores.best_score
+        """, (
+            NEON_RAIL_RUNNER_KEY,
+            user_id,
+            score,
+            current_time,
+            current_time
+        ))
+
+        conn.commit()
+
+        saved_row = conn.execute("""
+            SELECT best_score
+            FROM game_scores
+            WHERE game_key = ?
+              AND user_id = ?
+        """, (
+            NEON_RAIL_RUNNER_KEY,
+            user_id
+        )).fetchone()
+
+        saved_best = int(saved_row["best_score"])
+        ranking = get_neon_rail_leaderboard(
+            conn,
+            user_id
+        )
+
+    finally:
+        conn.close()
+
+    return jsonify({
+        "success": True,
+        "submitted_score": score,
+        "best_score": saved_best,
+        "is_new_best": (
+            previous_best is None
+            or score > previous_best
+        ),
+        **ranking
+    })
 
 
 @app.route(

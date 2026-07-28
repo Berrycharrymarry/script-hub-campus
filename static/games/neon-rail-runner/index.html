@@ -52,7 +52,7 @@
       }
 
       var buildUrl = "Build";
-      var buildVersion = "?v=20260727-2";
+      var buildVersion = "?v=20260728-1";
       var loaderUrl = buildUrl + "/WebGLBuild.loader.js" + buildVersion;
       var config = {
         arguments: [],
@@ -104,9 +104,9 @@
 
 
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+        // Desktop style: fit the available iframe instead of forcing a 960px canvas.
+        canvas.style.width = "100%";
+        canvas.style.height = "calc(100vh - 38px)";
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
