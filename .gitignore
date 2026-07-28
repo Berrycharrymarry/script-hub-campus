@@ -9,3 +9,4 @@ backups/
 app_old*.py
 practice*.py
 *.petpack
+desktop_pet_player/dist/

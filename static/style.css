@@ -2550,7 +2550,7 @@ pre code {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 14px;
-    margin: 20px 0 48px;
+    margin: 20px 0 16px;
 }
 
 .pet-quick-guide article {
@@ -2586,6 +2586,61 @@ pre code {
     color: var(--text-secondary);
     font-size: 11px;
     line-height: 1.45;
+}
+
+.pet-player-import-note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+    padding: 18px 20px;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #ffffff
+        );
+}
+
+.pet-player-import-mark {
+    display: grid;
+    width: 50px;
+    height: 50px;
+    place-items: center;
+    border-radius: 14px;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.pet-player-import-note strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.pet-player-import-note p {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.pet-player-import-note code {
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
 }
 
 .pet-builder-shell {
@@ -3219,6 +3274,12 @@ pre code {
     }
 
     .pet-quick-guide {
+        grid-template-columns: 1fr;
+        margin-bottom: 16px;
+    }
+
+    .pet-player-import-note {
+        align-items: flex-start;
         grid-template-columns: 1fr;
         margin-bottom: 36px;
     }

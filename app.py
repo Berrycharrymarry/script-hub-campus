@@ -53,6 +53,8 @@ NEON_RAIL_RUNNER_BUILD = (
     / "neon-rail-runner"
 )
 
+DESKTOP_PET_PLAYER_VERSION = "1.1.0"
+
 # Flask 使用 SECRET_KEY 对 Session 登录信息进行签名
 app.config["SECRET_KEY"] = os.getenv(
     "FLASK_SECRET_KEY",
@@ -1492,7 +1494,10 @@ def my_favorites():
 def pet_generator():
     return render_template(
         "pet_generator.html",
-        max_files=MAX_FILES
+        max_files=MAX_FILES,
+        player_version=(
+            DESKTOP_PET_PLAYER_VERSION
+        )
     )
 
 
@@ -1508,11 +1513,25 @@ def download_desktop_pet_player():
     if not player_path.is_file():
         return "桌宠播放器暂时不可用。", 404
 
-    return send_file(
+    response = send_file(
         player_path,
         as_attachment=True,
-        download_name="桌宠播放器.exe"
+        download_name=(
+            "桌宠播放器-v"
+            + DESKTOP_PET_PLAYER_VERSION
+            + ".exe"
+        ),
+        max_age=0
     )
+
+    response.headers["Cache-Control"] = (
+        "no-store, max-age=0"
+    )
+    response.headers[
+        "X-Desktop-Pet-Player-Version"
+    ] = DESKTOP_PET_PLAYER_VERSION
+
+    return response
 
 
 def parse_pet_string_list(

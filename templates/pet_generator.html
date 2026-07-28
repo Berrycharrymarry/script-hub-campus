@@ -127,9 +127,9 @@
 
                     <a
                         class="button button-outline"
-                        href="/downloads/desktop-pet-player"
+                        href="/downloads/desktop-pet-player?v={{ player_version }}"
                     >
-                        ⬇ 下载桌宠播放器
+                        ⬇ 下载播放器 v{{ player_version }}
                     </a>
                 </div>
             </div>
@@ -183,9 +183,26 @@
                 <span>03</span>
                 <div>
                     <strong>导入 petpack</strong>
-                    <p>生成后在播放器中选择导入即可。</p>
+                    <p>在蓝色导入窗口中选择文件，或直接拖进去。</p>
                 </div>
             </article>
+        </section>
+
+        <section class="pet-player-import-note">
+            <div class="pet-player-import-mark">NEW</div>
+
+            <div>
+                <strong>
+                    播放器 v{{ player_version }} 已修复导入窗口
+                </strong>
+
+                <p>
+                    启动播放器后会显示一个独立的导入窗口。
+                    选择网站生成的 <code>.petpack</code>，
+                    或把文件拖入窗口即可。
+                    以后想换桌宠，双击任务栏右下角的播放器图标。
+                </p>
+            </div>
         </section>
 
         <section
@@ -362,9 +379,10 @@
 
                         <a
                             class="button button-outline"
-                            href="/downloads/desktop-pet-player"
+                            href="/downloads/desktop-pet-player?v={{ player_version }}"
                         >
                             下载 Windows 播放器
+                            v{{ player_version }}
                         </a>
                     </section>
                 </div>

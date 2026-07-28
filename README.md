@@ -15,6 +15,7 @@ ScriptHub Campus 是一个面向校园场景的 Flask 脚本分享网站，支�
 - ScriptCat 与 Tampermonkey 安装指南：包含官方商店、用户脚本权限、兼容性判断和故障排查
 - DeepSeek AI 问答助手
 - 桌宠工坊：使用图片或动画生成 `.petpack` 资源包
+- 桌宠播放器 v1.1：可见导入窗口、拖放导入、托盘双击换桌宠，并禁用旧安装包缓存
 - Neon Rail Runner（Metro Rush 3D）Unity WebGL 浏览器游戏
 
 ## 本地运行
